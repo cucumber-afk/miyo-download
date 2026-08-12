@@ -1,293 +1,171 @@
 import { useState } from 'react';
 import {
   ArrowDown,
-  ArrowUpRight,
+  ArrowRight,
   ChevronDown,
-  ChevronRight,
   Download,
   Heart,
   Menu,
+  MonitorDown,
   Play,
+  Smartphone,
   Sparkles,
   X,
 } from 'lucide-react';
 import './index.css';
 
-const MIYO_MAIN = '/assets/miyo-main.png';
+const officialAssets = {
+  main: '/assets/home/hero-main.png',
+  secondary: '/assets/home/hero-secondary.png',
+  grid: '/assets/home/hero-grid.png',
+  fallback: '/assets/miyo-main.png',
+};
 
-const characters = [
-  {
-    name: 'Happy',
-    mood: 'Bright & bubbly',
-    color: '#f5ce45',
-    accent: '#fff3b7',
-    copy: 'A sunny little presence for wins, plans, and everyday sparks.',
-  },
-  {
-    name: 'Sleep',
-    mood: 'Soft & sleepy',
-    color: '#bfc9dc',
-    accent: '#edf1fb',
-    copy: 'A quiet companion for softer screens and slower evenings.',
-  },
-  {
-    name: 'Love',
-    mood: 'Warm & tender',
-    color: '#efb4ad',
-    accent: '#ffe4df',
-    copy: 'A gentle reminder that the best moments are always shared.',
-  },
-  {
-    name: 'Birthday',
-    mood: 'Party mode',
-    color: '#efad69',
-    accent: '#ffe1ba',
-    copy: 'A celebration-ready MiYo for making an entrance.',
-  },
-  {
-    name: 'Holiday',
-    mood: 'Festive & fun',
-    color: '#a8c6ae',
-    accent: '#e1efe0',
-    copy: 'A little seasonal joy to keep close all year long.',
-  },
+const characterPacks = [
+  { name: 'Classic MiYo', detail: 'The everyday collection', count: '12 animations', image: officialAssets.main, tone: 'yellow' },
+  { name: 'Happy Day', detail: 'Bright expressions & loops', count: '8 GIFs', image: officialAssets.secondary, tone: 'coral' },
+  { name: 'Soft Mode', detail: 'Quiet moments for your badge', count: '6 animations', image: officialAssets.grid, tone: 'blue' },
+  { name: 'Love Notes', detail: 'Heartfelt reactions', count: '10 GIFs', image: officialAssets.main, tone: 'pink' },
+  { name: 'Birthday', detail: 'Celebrate on screen', count: '5 animations', image: officialAssets.secondary, tone: 'orange' },
+  { name: 'Seasonal Club', detail: 'Limited-time expressions', count: 'New monthly', image: officialAssets.grid, tone: 'green' },
 ];
 
-const downloads = [
-  { type: 'GIF Animations', title: 'Happy — Welcome Loop', meta: 'GIF · 12.4 MB', color: '#f5ce45' },
-  { type: 'Wallpapers', title: 'Sleep — Midnight Glow', meta: 'PNG · 4K · 8.1 MB', color: '#bfc9dc' },
-  { type: 'GIF Animations', title: 'Love — Heartbeat', meta: 'GIF · 9.8 MB', color: '#efb4ad' },
-  { type: 'Firmware Updates', title: 'MiYo OS 2.4.0', meta: 'Firmware · 2.1 MB', color: '#a8c6ae' },
+const downloadCategories = [
+  { title: 'GIF Animations', description: 'Looping expressions made for your MiYo digital badge.', action: 'Browse GIFs', icon: Play, tone: 'yellow' },
+  { title: 'Wallpapers', description: 'Official MiYo backgrounds for desktop and mobile.', action: 'View wallpapers', icon: MonitorDown, tone: 'blue' },
+  { title: 'Firmware & Updates', description: 'Keep your badge ready for the newest character packs.', action: 'Check updates', icon: Smartphone, tone: 'dark' },
+  { title: 'Seasonal Packs', description: 'Special releases for holidays, birthdays, and more.', action: 'Explore packs', icon: Sparkles, tone: 'coral' },
 ];
 
-function MiyoImage({ className = '', alt = 'MiYo character' }) {
-  return <img className={`miyo-image ${className}`} src={MIYO_MAIN} alt={alt} />;
+const files = [
+  { title: 'Classic MiYo: Hello Loop', type: 'GIF animation', size: 'GIF · 8.4 MB', image: officialAssets.main, tone: 'yellow' },
+  { title: 'Happy Day Expressions', type: 'GIF animation', size: 'ZIP · 14 GIFs · 12.1 MB', image: officialAssets.secondary, tone: 'coral' },
+  { title: 'MiYo Character Wallpaper Set', type: 'Wallpapers', size: 'PNG · Mobile + desktop · 18 MB', image: officialAssets.grid, tone: 'blue' },
+  { title: 'MiYo OS 2.4.0', type: 'Firmware & updates', size: 'Firmware · 2.1 MB', image: officialAssets.main, tone: 'dark' },
+];
+
+function OfficialImage({ src, className = '', alt }) {
+  const [failed, setFailed] = useState(false);
+  return <img className={className} src={failed ? officialAssets.fallback : src} alt={alt} onError={() => setFailed(true)} />;
 }
 
 function Nav({ active, setActive }) {
   const [open, setOpen] = useState(false);
   const links = ['Home', 'Characters', 'Downloads', 'Support'];
 
+  const navigate = (item) => {
+    setActive(item);
+    setOpen(false);
+  };
+
   return (
     <header className="site-header">
-      <a className="brand" href="#home" onClick={() => setActive('Home')}>
+      <a className="brand" href="#home" onClick={() => navigate('Home')}>
         <span className="brand-mark">m</span>
         <span>MiYo <em>Studio</em></span>
       </a>
       <nav className={open ? 'nav-links nav-links--open' : 'nav-links'}>
         {links.map((link) => (
-          <a
-            key={link}
-            className={active === link ? 'nav-link nav-link--active' : 'nav-link'}
-            href={`#${link.toLowerCase()}`}
-            onClick={() => {
-              setActive(link);
-              setOpen(false);
-            }}
-          >
-            {link}
-          </a>
+          <a key={link} className={active === link ? 'nav-link nav-link--active' : 'nav-link'} href={`#${link.toLowerCase()}`} onClick={() => navigate(link)}>{link}</a>
         ))}
       </nav>
-      <button className="menu-button" onClick={() => setOpen(!open)} aria-label="Toggle menu">
-        {open ? <X size={20} /> : <Menu size={20} />}
-      </button>
-      <a className="header-download" href="#downloads" onClick={() => setActive('Downloads')}>
-        Get MiYo <ArrowUpRight size={15} />
-      </a>
+      <button className="menu-button" onClick={() => setOpen(!open)} aria-label="Toggle menu">{open ? <X size={20} /> : <Menu size={20} />}</button>
+      <a className="header-download" href="#downloads" onClick={() => navigate('Downloads')}>Download center <ArrowRight size={15} /></a>
     </header>
   );
 }
 
-function Home({ setActive }) {
+function Hero({ setActive }) {
   return (
-    <main id="home">
-      <section className="hero page-wrap">
-        <div className="hero-copy">
-          <p className="eyebrow"><span className="eyebrow-dot" />Digital character badges</p>
-          <h1>Make room<br />for <span>joy.</span></h1>
-          <p className="hero-text">Meet MiYo, a tiny digital companion designed to bring character, color, and a little more feeling to every screen.</p>
-          <div className="hero-actions">
-            <a className="button button--dark" href="#downloads" onClick={() => setActive('Downloads')}>
-              Download animations <ArrowDown size={16} />
-            </a>
-            <a className="text-link" href="#characters" onClick={() => setActive('Characters')}>
-              Explore characters <ChevronRight size={17} />
-            </a>
-          </div>
+    <section className="hero page-wrap" id="home">
+      <div className="hero-copy">
+        <p className="eyebrow"><span className="eyebrow-dot" />Official MiYo character downloads</p>
+        <h1>Your MiYo<br /><span>character library.</span></h1>
+        <p className="hero-text">Download expressions, animations, wallpapers, and updates for your MiYo digital badge. Choose a mood and take your companion everywhere.</p>
+        <div className="hero-actions">
+          <a className="button button--dark" href="#downloads" onClick={() => setActive('Downloads')}>Download animations <ArrowDown size={16} /></a>
+          <a className="text-link" href="#characters" onClick={() => setActive('Characters')}>Explore characters <ArrowRight size={17} /></a>
         </div>
-        <div className="hero-visual">
-          <div className="hero-halo hero-halo--one" />
-          <div className="hero-halo hero-halo--two" />
-          <span className="visual-label visual-label--top">Original character / 01</span>
-          <MiyoImage className="hero-miyo" alt="MiYo official character" />
-          <span className="visual-label visual-label--bottom">A tiny friend for<br />the everyday.</span>
-          <Sparkles className="visual-sparkle" size={20} strokeWidth={1.4} />
+        <div className="hero-stats">
+          <span><strong>45+</strong> official animations</span>
+          <span><strong>4</strong> download categories</span>
         </div>
-      </section>
-
-      <section className="intro-strip page-wrap">
-        <p>Designed to feel<br /><strong>like a friend.</strong></p>
-        <div className="strip-line" />
-        <span className="strip-note">Scroll to discover <ArrowDown size={14} /></span>
-      </section>
-
-      <section className="feature-band page-wrap">
-        <div>
-          <p className="section-kicker">01 — The MiYo world</p>
-          <h2>Small character.<br />Big <i>feeling.</i></h2>
-        </div>
-        <p className="feature-description">MiYo was created to make technology feel a little more human. Collect expressive moments, set your mood, and carry a little joy along with you.</p>
-      </section>
-    </main>
+      </div>
+      <div className="hero-gallery" aria-label="MiYo official character artwork">
+        <div className="hero-main-art"><span className="gallery-label">Featured character pack</span><OfficialImage src={officialAssets.main} alt="Official MiYo character artwork" /></div>
+        <div className="hero-side-art hero-side-art--top"><OfficialImage src={officialAssets.secondary} alt="MiYo character expression" /></div>
+        <div className="hero-side-art hero-side-art--bottom"><OfficialImage src={officialAssets.grid} alt="MiYo character collection" /></div>
+        <span className="gallery-caption">Made for your<br />digital badge</span>
+      </div>
+    </section>
   );
 }
 
-function Characters() {
+function FeaturedCharacters({ limit, title = 'Featured character packs', subtitle = 'Choose a collection, then download the expressions that fit your day.' }) {
+  const shown = limit ? characterPacks.slice(0, limit) : characterPacks;
   return (
-    <main id="characters" className="page-wrap page-section">
+    <section className="page-wrap content-section" id="characters">
       <div className="section-heading">
-        <div>
-          <p className="section-kicker">02 — Meet the collection</p>
-          <h2>Find your <i>MiYo.</i></h2>
-        </div>
-        <p>Five ways to show how<br />today feels.</p>
+        <div><p className="section-kicker">Character library</p><h2>{title}</h2></div>
+        <p>{subtitle}</p>
       </div>
       <div className="character-grid">
-        {characters.map((character, index) => (
-          <article
-            className={`character-card ${index === 0 ? 'character-card--featured' : ''}`}
-            key={character.name}
-            style={{ '--tile-color': character.color, '--tile-accent': character.accent }}
-          >
-            <div className="card-art">
-              <span className="card-index">0{index + 1}</span>
-              <span className="art-orbit" />
-              <MiyoImage className="card-miyo" alt={`${character.name} MiYo official character`} />
-              <span className="art-shine">✦</span>
-            </div>
-            <div className="card-content">
-              <div>
-                <p className="card-mood">{character.mood}</p>
-                <h3>{character.name}</h3>
-              </div>
-              <p>{character.copy}</p>
-              <button className="icon-button" aria-label={`Explore ${character.name}`}><ArrowUpRight size={17} /></button>
-            </div>
+        {shown.map((pack, index) => (
+          <article className={`character-card character-card--${pack.tone}`} key={pack.name}>
+            <div className="card-art"><span className="card-index">{String(index + 1).padStart(2, '0')}</span><OfficialImage src={pack.image} alt={`${pack.name} official MiYo character art`} /></div>
+            <div className="card-content"><div><p className="card-mood">{pack.detail}</p><h3>{pack.name}</h3></div><p>{pack.count}</p><button className="icon-button" aria-label={`Open ${pack.name}`}><ArrowRight size={17} /></button></div>
           </article>
         ))}
       </div>
-    </main>
+    </section>
+  );
+}
+
+function DownloadCenter({ compact = false }) {
+  return (
+    <section className={compact ? 'download-center download-center--compact' : 'download-center page-wrap'} id={compact ? undefined : 'downloads'}>
+      {!compact && <div className="section-heading"><div><p className="section-kicker">Download center</p><h2>Pick a pack.<br /><i>Make it yours.</i></h2></div><p>Official digital content, organized for your MiYo badge.</p></div>}
+      <div className="category-grid">
+        {downloadCategories.map(({ title, description, action, icon: Icon, tone }) => (
+          <article className={`category-card category-card--${tone}`} key={title}><span className="category-icon"><Icon size={19} /></span><div><h3>{title}</h3><p>{description}</p></div><a href="#downloads" className="category-action">{action} <ArrowRight size={15} /></a></article>
+        ))}
+      </div>
+    </section>
   );
 }
 
 function Downloads() {
   const [filter, setFilter] = useState('All');
-  const filters = ['All', 'GIF Animations', 'Wallpapers', 'Firmware Updates'];
-  const shown = filter === 'All' ? downloads : downloads.filter((item) => item.type === filter);
-
+  const filters = ['All', 'GIF animation', 'Wallpapers', 'Firmware & updates'];
+  const shown = filter === 'All' ? files : files.filter((file) => file.type === filter);
   return (
-    <main id="downloads" className="page-wrap page-section downloads-section">
-      <div className="section-heading">
-        <div>
-          <p className="section-kicker">03 — The download room</p>
-          <h2>Bring MiYo<br /><i>to life.</i></h2>
-        </div>
-        <p>Official animation packs,<br />wallpapers, and updates.</p>
-      </div>
-      <div className="filter-row" aria-label="Download filters">
-        {filters.map((item) => (
-          <button key={item} className={filter === item ? 'filter-button filter-button--active' : 'filter-button'} onClick={() => setFilter(item)}>
-            {item}
-          </button>
-        ))}
-      </div>
-      <div className="download-list">
-        {shown.map((item) => (
-          <article className="download-row" key={item.title}>
-            <div className="download-preview" style={{ '--preview-color': item.color }}>
-              <MiyoImage className="download-miyo" alt="MiYo animation preview" />
-            </div>
-            <div className="download-info">
-              <p className="card-mood">{item.type}</p>
-              <h3>{item.title}</h3>
-            </div>
-            <span className="download-meta">{item.meta}</span>
-            <button className="download-button" aria-label={`Download ${item.title}`}><Download size={17} /></button>
-          </article>
-        ))}
-      </div>
+    <main className="page-wrap page-section downloads-page" id="downloads">
+      <div className="section-heading"><div><p className="section-kicker">Download center</p><h2>Official files for<br /><i>your badge.</i></h2></div><p>Download the latest character content, device updates, and companion art.</p></div>
+      <DownloadCenter compact />
+      <div className="library-heading"><div><p className="section-kicker">Latest releases</p><h3>Ready to download</h3></div><div className="filter-row" aria-label="Download filters">{filters.map((item) => <button key={item} className={filter === item ? 'filter-button filter-button--active' : 'filter-button'} onClick={() => setFilter(item)}>{item}</button>)}</div></div>
+      <div className="download-list">{shown.map((file) => <article className="download-row" key={file.title}><div className={`download-preview download-preview--${file.tone}`}><OfficialImage src={file.image} alt={`${file.title} artwork`} /></div><div className="download-info"><p className="card-mood">{file.type}</p><h3>{file.title}</h3></div><span className="download-meta">{file.size}</span><button className="download-button" aria-label={`Download ${file.title}`}><Download size={17} /></button></article>)}</div>
     </main>
   );
+}
+
+function HowItWorks() {
+  const steps = ['Choose a character', 'Download the file', 'Transfer to your badge', 'Enjoy your MiYo companion'];
+  return <section className="how-it-works"><div className="page-wrap"><div className="section-heading"><div><p className="section-kicker">Getting started</p><h2>From library<br />to <i>badge.</i></h2></div><p>Your first MiYo download takes only a few minutes.</p></div><ol className="steps-list">{steps.map((step, index) => <li key={step}><span>0{index + 1}</span><strong>{step}</strong><ArrowRight size={17} /></li>)}</ol></div></section>;
 }
 
 function Support() {
   const [open, setOpen] = useState(0);
   const faqs = [
-    ['How do I install a MiYo animation?', 'Download the file, then follow the setup guide for your device. Your MiYo will be ready in a few minutes.'],
-    ['Which devices are supported?', 'MiYo is designed for our digital character badge display and works with macOS, Windows, and mobile setup tools.'],
-    ['Can I suggest a new character?', 'Absolutely. Send us a note with your idea and we may bring it to life in a future collection.'],
+    ['How do I transfer a MiYo download?', 'Download your chosen file, connect your digital badge, and use the MiYo transfer tool to add it.'],
+    ['What files work with my badge?', 'GIF animations, supported wallpaper files, and official MiYo firmware packages are ready for compatible digital badges.'],
+    ['Where can I find new packs?', 'New official releases appear in the Download Center and Seasonal Packs throughout the year.'],
   ];
-
-  return (
-    <main id="support" className="page-wrap page-section support-section">
-      <div className="section-heading">
-        <div>
-          <p className="section-kicker">04 — We are here</p>
-          <h2>Made simple.<br /><i>Made together.</i></h2>
-        </div>
-        <p>Everything you need to<br />make MiYo yours.</p>
-      </div>
-      <div className="support-grid">
-        <a className="support-card support-card--dark" href="#downloads">
-          <div>
-            <span className="support-icon"><Play size={15} fill="currentColor" /></span>
-            <h3>Setup guide</h3>
-            <p>Get your MiYo moving in three simple steps.</p>
-          </div>
-          <ArrowUpRight size={20} />
-        </a>
-        <div className="faq-panel">
-          <p className="card-mood">Frequently asked</p>
-          {faqs.map(([question, answer], index) => (
-            <div className="faq-item" key={question}>
-              <button onClick={() => setOpen(open === index ? -1 : index)}>
-                <span>{question}</span>
-                <ChevronDown className={open === index ? 'chevron chevron--open' : 'chevron'} size={18} />
-              </button>
-              {open === index && <p>{answer}</p>}
-            </div>
-          ))}
-        </div>
-        <a className="contact-row" href="mailto:hello@miyostudio.com">
-          <div>
-            <p className="card-mood">Still curious?</p>
-            <h3>Say hello <span>→</span></h3>
-          </div>
-          <Heart size={22} />
-        </a>
-      </div>
-    </main>
-  );
+  return <main className="page-wrap page-section support-section" id="support"><div className="section-heading"><div><p className="section-kicker">Support</p><h2>Need a little<br /><i>help?</i></h2></div><p>Quick answers and simple setup help for your MiYo badge.</p></div><div className="support-grid"><a className="support-card support-card--dark" href="#downloads"><span className="support-icon"><Play size={15} fill="currentColor" /></span><div><h3>Badge setup guide</h3><p>Everything you need to transfer your first MiYo animation.</p></div><ArrowRight size={20} /></a><div className="faq-panel"><p className="card-mood">Quick FAQ</p>{faqs.map(([question, answer], index) => <div className="faq-item" key={question}><button onClick={() => setOpen(open === index ? -1 : index)}><span>{question}</span><ChevronDown className={open === index ? 'chevron chevron--open' : 'chevron'} size={18} /></button>{open === index && <p>{answer}</p>}</div>)}</div><a className="contact-row" href="mailto:hello@miyostudio.com"><div><p className="card-mood">Need more help?</p><h3>Contact MiYo Studio</h3></div><Heart size={22} /></a></div></main>;
 }
 
 function App() {
   const [active, setActive] = useState('Home');
-
-  return (
-    <>
-      <Nav active={active} setActive={setActive} />
-      <Home setActive={setActive} />
-      <Characters />
-      <Downloads />
-      <Support />
-      <footer className="site-footer page-wrap">
-        <a className="brand" href="#home"><span className="brand-mark">m</span><span>MiYo <em>Studio</em></span></a>
-        <p>Digital characters for real moments.</p>
-        <span>© 2026 MiYo Studio</span>
-      </footer>
-    </>
-  );
+  return <><Nav active={active} setActive={setActive} /><Hero setActive={setActive} /><FeaturedCharacters limit={4} /><DownloadCenter /><HowItWorks /><Downloads /><Support /><footer className="site-footer page-wrap"><a className="brand" href="#home"><span className="brand-mark">m</span><span>MiYo <em>Studio</em></span></a><p>Official digital badge downloads</p><span>© 2026 MiYo Studio</span></footer></>;
 }
 
 export default App;
