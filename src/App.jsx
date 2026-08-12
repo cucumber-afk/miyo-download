@@ -1,0 +1,42 @@
+import { useState } from 'react';
+import { ArrowDown, ArrowUpRight, ChevronDown, ChevronRight, Download, Heart, Menu, Play, Sparkles, X } from 'lucide-react';
+import './index.css';
+
+const characters = [
+  { name: 'Happy', mood: 'Bright & bubbly', color: '#f4cf37', face: '◡̈', copy: 'A pocket-sized burst of good energy for every little win.' },
+  { name: 'Sleep', mood: 'Soft & sleepy', color: '#bdc8dc', face: '－ －', copy: 'A slow, cozy companion for quiet screens and calmer days.' },
+  { name: 'Love', mood: 'Warm & tender', color: '#eb9a95', face: '⌣', copy: 'A little reminder that the best moments are better shared.' },
+  { name: 'Birthday', mood: 'Party mode', color: '#f2a45b', face: '✦', copy: 'Bring the confetti. This one knows how to make an entrance.' },
+  { name: 'Holiday', mood: 'Festive & fun', color: '#9cbf9f', face: '•ᴗ•', copy: 'Seasonal cheer, ready to brighten your digital space.' },
+];
+
+const downloads = [
+  { type: 'GIF Animations', title: 'Happy — Loop Pack', meta: 'GIF · 12.4 MB', color: '#f4cf37', face: '◡̈' },
+  { type: 'Wallpapers', title: 'Sleep — Midnight Glow', meta: 'PNG · 4K · 8.1 MB', color: '#bdc8dc', face: '－ －' },
+  { type: 'GIF Animations', title: 'Love — Heartbeat', meta: 'GIF · 9.8 MB', color: '#eb9a95', face: '⌣' },
+  { type: 'Firmware Updates', title: 'MiYo OS 2.4.0', meta: 'Firmware · 2.1 MB', color: '#9cbf9f', face: '•ᴗ•' },
+];
+
+function CharacterArt({ color, face, small = false }) {
+  return <div className={`character-art ${small ? 'character-art--small' : ''}`} style={{ '--character-color': color }}><div className="character-shadow" /><div className="character-body"><span className="character-face">{face}</span><span className="character-feet" /></div><span className="character-spark">✦</span></div>;
+}
+
+function Nav({ active, setActive }) {
+  const [open, setOpen] = useState(false);
+  const links = ['Home', 'Characters', 'Downloads', 'Support'];
+  return <header className="site-header"><a className="brand" href="#home" onClick={() => setActive('Home')}><span className="brand-mark">m</span><span>MiYo <em>Studio</em></span></a><nav className={open ? 'nav-links nav-links--open' : 'nav-links'}>{links.map(link => <a key={link} className={active === link ? 'nav-link nav-link--active' : 'nav-link'} href={`#${link.toLowerCase()}`} onClick={() => { setActive(link); setOpen(false); }}>{link}</a>)}</nav><button className="menu-button" onClick={() => setOpen(!open)} aria-label="Toggle menu">{open ? <X size={20} /> : <Menu size={20} />}</button><a className="header-download" href="#downloads" onClick={() => setActive('Downloads')}>Get MiYo <ArrowUpRight size={15} /></a></header>;
+}
+
+function Home({ setActive }) {
+  return <main id="home"><section className="hero page-wrap"><div className="hero-copy"><p className="eyebrow"><span className="eyebrow-dot" />Digital character badges</p><h1>A little<br /><span>more you.</span></h1><p className="hero-text">Meet MiYo — tiny digital companions made to live on your screen, in your mood, and everywhere in between.</p><div className="hero-actions"><a className="button button--dark" href="#downloads" onClick={() => setActive('Downloads')}>Download animations <ArrowDown size={16} /></a><a className="text-link" href="#characters" onClick={() => setActive('Characters')}>Explore characters <ChevronRight size={17} /></a></div></div><div className="hero-visual"><div className="hero-orbit hero-orbit--one" /><div className="hero-orbit hero-orbit--two" /><span className="visual-label visual-label--top">01 / 05</span><CharacterArt color="#f4cf37" face="◡̈" /><span className="visual-label visual-label--bottom">Made for your<br />everyday moments.</span><span className="visual-plus">+</span></div></section><section className="intro-strip page-wrap"><p>Designed to feel<br /><strong>like a friend.</strong></p><div className="strip-line" /><span className="strip-note">Scroll to discover <ArrowDown size={14} /></span></section><section className="feature-band page-wrap"><div><p className="section-kicker">01 — The MiYo world</p><h2>Small characters.<br />Big <i>personality.</i></h2></div><p className="feature-description">Every MiYo is made with a distinct rhythm, expression, and point of view. Pick the one that feels most like you — then make it yours.</p></section></main>;
+}
+
+function Characters() { return <main id="characters" className="page-wrap page-section"><div className="section-heading"><div><p className="section-kicker">02 — Meet the collection</p><h2>Find your <i>MiYo.</i></h2></div><p>Five moods. Infinite moments.<br />Which one are you today?</p></div><div className="character-grid">{characters.map((character, index) => <article className={`character-card ${index === 0 ? 'character-card--featured' : ''}`} key={character.name}><div className="card-art"><span className="card-index">0{index + 1}</span><CharacterArt color={character.color} face={character.face} small={index !== 0} /></div><div className="card-content"><div><p className="card-mood">{character.mood}</p><h3>{character.name}</h3></div><p>{character.copy}</p><button className="icon-button" aria-label={`Explore ${character.name}`}><ArrowUpRight size={17} /></button></div></article>)}</div></main>; }
+
+function Downloads() { const [filter, setFilter] = useState('All'); const filters = ['All', 'GIF Animations', 'Wallpapers', 'Firmware Updates']; const shown = filter === 'All' ? downloads : downloads.filter(item => item.type === filter); return <main id="downloads" className="page-wrap page-section downloads-section"><div className="section-heading"><div><p className="section-kicker">03 — The download room</p><h2>Bring MiYo<br /><i>to life.</i></h2></div><p>Animations, wallpapers, and<br />updates for your badge.</p></div><div className="filter-row">{filters.map(item => <button key={item} className={filter === item ? 'filter-button filter-button--active' : 'filter-button'} onClick={() => setFilter(item)}>{item}</button>)}</div><div className="download-list">{shown.map(item => <article className="download-row" key={item.title}><div className="download-preview"><CharacterArt color={item.color} face={item.face} small /></div><div className="download-info"><p className="card-mood">{item.type}</p><h3>{item.title}</h3></div><span className="download-meta">{item.meta}</span><button className="download-button" aria-label={`Download ${item.title}`}><Download size={17} /></button></article>)}</div></main>; }
+
+function Support() { const [open, setOpen] = useState(0); const faqs = [['How do I install a MiYo animation?', 'Download the file, then follow the setup guide for your device. Your MiYo will be ready in a few minutes.'], ['Which devices are supported?', 'MiYo is designed for our digital character badge display and works with macOS, Windows, and mobile setup tools.'], ['Can I suggest a new character?', 'Absolutely. Send us a note with your idea and we may bring it to life in a future collection.']]; return <main id="support" className="page-wrap page-section support-section"><div className="section-heading"><div><p className="section-kicker">04 — We are here</p><h2>Made simple.<br /><i>Made together.</i></h2></div><p>Everything you need to<br />make MiYo yours.</p></div><div className="support-grid"><a className="support-card support-card--dark" href="#downloads"><div><span className="support-icon"><Play size={15} fill="currentColor" /></span><h3>Setup guide</h3><p>Get your MiYo moving in three simple steps.</p></div><ArrowUpRight size={20} /></a><div className="faq-panel"><p className="card-mood">Frequently asked</p>{faqs.map(([q, a], index) => <div className="faq-item" key={q}><button onClick={() => setOpen(open === index ? -1 : index)}><span>{q}</span><ChevronDown className={open === index ? 'chevron chevron--open' : 'chevron'} size={18} /></button>{open === index && <p>{a}</p>}</div>)}</div><a className="contact-row" href="mailto:hello@miyostudio.com"><div><p className="card-mood">Still curious?</p><h3>Say hello <span>→</span></h3></div><Heart size={22} /></a></div></main>; }
+
+function App() { const [active, setActive] = useState('Home'); return <><Nav active={active} setActive={setActive} /><Home setActive={setActive} /><Characters /><Downloads /><Support /><footer className="site-footer page-wrap"><a className="brand" href="#home"><span className="brand-mark">m</span><span>MiYo <em>Studio</em></span></a><p>Digital characters for real moments.</p><span>© 2026 MiYo Studio</span></footer></>; }
+
+export default App;
