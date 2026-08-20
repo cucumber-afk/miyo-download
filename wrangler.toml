@@ -7,3 +7,7 @@ binding = "DB"
 database_name = "miyo-studio"
 database_id = "7c7575cb-9b3d-41f6-8d63-e07201cb0a6c"
 migrations_dir = "migrations"
+
+[[kv_namespaces]]
+binding = "MEDIA_KV"
+id = "36a5471eb68f4f6a9bed46c970eaccbb"

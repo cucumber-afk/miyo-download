@@ -9,7 +9,7 @@ MiYo Studio is a Vite + React animation download platform with a Cloudflare Page
 | Cloudflare Pages project | `miyo-download` |
 | Production URL | `https://miyo-download.pages.dev` |
 | D1 database | `miyo-studio` |
-| Media mode | Static Pages assets (no R2) |
+| Media mode | Workers KV uploads; legacy static Pages assets |
 | Cloudflare Access | Disabled |
 
 ## Requirements
@@ -48,17 +48,17 @@ To view production logs:
 npx wrangler pages deployment tail --project-name miyo-download --environment production --status error
 ```
 
-The `_redirects` file preserves SPA navigation on Pages. Public API responses contain only `published` rows. Admin metadata is stored in D1; GIF and MP4 files are static Pages assets under `public/assets/animations/library/`.
+The production runtime uses Workers KV for uploaded GIF and MP4 media. Legacy static Pages assets remain available for bundled Hero and website assets only.
 
 ## Animation metadata
 
-Admin entries require a title, category, character color, valid content scale, and at least one static GIF or MP4 path before publishing. Paths must use `/assets/animations/library/`; file sizes are stored as bytes in D1 and formatted for the UI. The existing `miyoCharacters.js` screen calibration remains static and is not editable from Admin.
+Admin entries require a title, category, character color, valid content scale, and at least one media object before publishing. Legacy static paths remain supported for bundled assets; new Admin uploads use Workers KV. The existing `miyoCharacters.js` screen calibration remains static and is not editable from Admin.
 
-## Static media workflow
+## Runtime media uploads
 
-1. Put real files in `public/assets/animations/library/`, such as `happy.gif` or `happy.mp4`.
-2. In Admin, enter `/assets/animations/library/happy.gif` and/or `/assets/animations/library/happy.mp4`.
-3. Save and publish the metadata in D1.
-4. Rebuild and deploy Pages after adding real media files, because static assets are included at build/deploy time.
+`MEDIA_KV` stores uploaded GIF and MP4 binaries; D1 stores animation metadata and the corresponding object keys. GIF uploads are limited to 8 MiB and MP4 uploads to 20 MiB. The server validates extension, declared MIME type, and GIF87a/GIF89a or ISO BMFF `ftyp` magic bytes. R2 is disabled and no payment method is required.
 
-R2 and Cloudflare Access are intentionally disabled and not required for the current runtime. GIF and MP4 files are served as static Pages assets.
+Administrators save a draft first, then upload or replace media from the Admin workspace. Preview URLs use `/api/media?key=...`; downloads use `/api/download?key=...&filename=...`. Replacements use a new UUID key and update D1 before deleting the previous KV object. Failed D1 updates immediately delete the newly uploaded object. A future orphan cleanup job may reconcile unusual interrupted writes.
+Legacy static asset workflow
+
+Bundled website media under `public/assets/animations/library/` remains supported for Hero and other legacy assets. New animation media should be uploaded from Admin and does not require a rebuild.

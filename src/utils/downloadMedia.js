@@ -15,11 +15,11 @@ export function getDownloadFileName(file, title, format) {
   return `miyo-${slugifyTitle(title)}.${extension}`;
 }
 
-export function getDownloadUrl(src, fileName) {
-  const params = new URLSearchParams({ url: src, filename: fileName });
+export function getDownloadUrl(file, fileName) {
+  const params = file?.mediaKey ? new URLSearchParams({ key: file.mediaKey, filename: fileName }) : new URLSearchParams({ url: file?.src || '', filename: fileName });
   return `/api/download?${params.toString()}`;
 }
 
-export async function downloadMedia({ src, fileName }) {
-  window.location.assign(getDownloadUrl(src, fileName));
+export async function downloadMedia({ src, mediaKey, fileName }) {
+  window.location.assign(getDownloadUrl({ src, mediaKey }, fileName));
 }

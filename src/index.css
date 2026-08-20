@@ -116,6 +116,16 @@ button:focus-visible { outline: 2px solid #191a18; outline-offset: 3px; }
 .admin-checkbox { align-items: center; display: flex !important; gap: 8px !important; }
 .admin-checkbox input { accent-color: #1c1d1b; }
 .admin-upload { border-top: 1px solid #d9d9d2; padding-top: 16px; }
+.admin-media-uploader { border-top: 1px solid #d9d9d2; display: grid; gap: 12px; padding-top: 16px; transition: background .2s ease; }
+.admin-media-uploader.is-dragging { background: #e2eaf1; outline: 2px dashed #6f8290; outline-offset: 5px; }
+.admin-media-hint, .admin-media-status, .admin-media-details span { color: #6f706b; font-family: 'DM Mono', monospace; font-size: 9px; margin: 0; }
+.admin-media-select { background: #fafaf7; border: 1px dashed #9b9b94; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 10px; min-height: 48px; padding: 12px; text-align: left; text-transform: uppercase; width: 100%; }
+.admin-media-select:disabled, .admin-media-details button:disabled { cursor: not-allowed; opacity: .55; }
+.admin-media-details { display: grid; gap: 6px; }
+.admin-media-details strong { font-size: 12px; overflow-wrap: anywhere; }
+.admin-media-details > div { display: flex; flex-wrap: wrap; gap: 7px; }
+.admin-media-details button { background: transparent; border: 1px solid #bfbfb8; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 9px; padding: 8px 9px; text-transform: uppercase; }
+.admin-media-details button:hover:not(:disabled) { background: #1c1d1b; color: #fff; }
 .admin-status { margin: 0; min-height: 14px; }
 .admin-timestamp-record { border-top: 1px solid #d9d9d2; padding-top: 16px; }
 .admin-timestamp-record .section-kicker { margin-bottom: 10px; }

@@ -9,8 +9,8 @@ function parseTags(value) {
 
 export function toAnimation(row) {
   const downloads = {};
-  if (row.gif_url) downloads.gif = { src: row.gif_url, fileName: row.gif_file_name, fileSize: formatBytes(row.gif_file_size) };
-  if (row.mp4_url) downloads.mp4 = { src: row.mp4_url, fileName: row.mp4_file_name, fileSize: formatBytes(row.mp4_file_size) };
+  if (row.gif_url) downloads.gif = { src: row.gif_url, fileName: row.gif_file_name, fileSize: formatBytes(row.gif_file_size), mediaKey: row.gif_object_key || null };
+  if (row.mp4_url) downloads.mp4 = { src: row.mp4_url, fileName: row.mp4_file_name, fileSize: formatBytes(row.mp4_file_size), mediaKey: row.mp4_object_key || null };
   return {
     id: row.id,
     slug: row.slug,
@@ -20,6 +20,8 @@ export function toAnimation(row) {
     downloads,
     gifPath: row.gif_url || '',
     mp4Path: row.mp4_url || '',
+    gifObjectKey: row.gif_object_key || '',
+    mp4ObjectKey: row.mp4_object_key || '',
     gifFileName: row.gif_file_name || '',
     mp4FileName: row.mp4_file_name || '',
     description: row.description,

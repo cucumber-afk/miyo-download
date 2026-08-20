@@ -19,8 +19,10 @@
 - [ ] The D1 database name is `miyo-studio`.
 - [ ] The D1 database ID is `7c7575cb-9b3d-41f6-8d63-e07201cb0a6c` (non-placeholder).
 - [ ] No `ACCESS_TEAM_DOMAIN` or `ACCESS_AUD` variable is required.
-- [ ] No R2 binding or `MEDIA_BUCKET` is required.
-- [ ] GIF and MP4 files are present in `public/assets/animations/library/`.
+- [ ] `MEDIA_KV` binding exists with the real namespace ID `36a5471eb68f4f6a9bed46c970eaccbb`.
+- [ ] GIF upload limit is 8 MiB and MP4 upload limit is 20 MiB.
+- [ ] D1 stores media metadata and object keys; KV stores binary media.
+- [ ] R2 remains disabled.
 - [ ] No test media files (e.g. `production-test.gif`) remain in the bundle.
 
 ## Database and Admin Setup
@@ -41,7 +43,16 @@
 - [ ] Admin write requests reject missing or cross-origin `Origin` headers.
 - [ ] Logout deletes the D1 session and clears the cookie.
 
-## Public API and Build
+## Media
+
+- [ ] `MEDIA_KV` is bound to the namespace ID recorded in `wrangler.toml`.
+- [ ] Draft creation succeeds before media upload is enabled.
+- [ ] GIF upload validates `.gif`, `image/gif`, GIF magic bytes, and 8 MiB maximum.
+- [ ] MP4 upload validates `.mp4`, `video/mp4`, `ftyp`, and 20 MiB maximum.
+- [ ] Replace writes a new key, updates D1, then deletes the old key.
+- [ ] Remove deletes only the animation's referenced key and clears D1 metadata.
+- [ ] Public preview is inline at `/api/media?key=...`; downloads use attachment responses.
+
 
 - [ ] `GET /api/animations` works without authentication.
 - [ ] `GET /api/animations/featured` works without authentication.

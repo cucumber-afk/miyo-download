@@ -1,5 +1,5 @@
 async function requestJson(path, options) {
-  const response = await fetch(path, { credentials: 'same-origin', headers: { accept: 'application/json', ...(options?.body ? { 'content-type': 'application/json' } : {}) }, ...options });
+  const response = await fetch(path, { credentials: 'same-origin', headers: { accept: 'application/json', ...(options?.body && !(options.body instanceof Blob) ? { 'content-type': 'application/json' } : {}), ...(options?.headers || {}) }, ...options });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `Request failed with ${response.status}`);
   return data;
@@ -19,13 +19,11 @@ export const updateAnimation = (id, input) => requestJson(`/api/admin/animations
 export const deleteAnimation = (id) => requestJson(`/api/admin/animations/${id}`, { method: 'DELETE' });
 export const publishAnimation = (id) => requestJson(`/api/admin/animations/${id}/publish`, { method: 'POST' });
 export const unpublishAnimation = (id) => requestJson(`/api/admin/animations/${id}/unpublish`, { method: 'POST' });
-export const requestUpload = (id, input) => requestJson(`/api/admin/animations/${id}/upload-url`, { method: 'POST', body: JSON.stringify(input) });
-export const completeUpload = (id, input) => requestJson(`/api/admin/animations/${id}/complete-upload`, { method: 'POST', body: JSON.stringify(input) });
 
-export async function uploadMedia(id, file) {
-  const format = file.type === 'image/gif' ? 'gif' : 'mp4';
-  const authorization = await requestUpload(id, { format, fileSize: file.size, contentType: file.type });
-  const uploadResponse = await fetch(authorization.uploadUrl, { method: 'PUT', headers: { 'content-type': file.type, 'content-length': String(file.size) }, body: file });
-  if (!uploadResponse.ok) throw new Error('Media upload failed.');
-  return completeUpload(id, { format, objectKey: authorization.objectKey, fileName: file.name, contentType: file.type });
+export function uploadMedia(id, format, file) {
+  return requestJson(`/api/admin/animations/${id}/media/${format}`, { method: 'POST', headers: { 'Content-Type': file.type, 'X-File-Name': file.name }, body: file });
+}
+
+export function removeMedia(id, format) {
+  return requestJson(`/api/admin/animations/${id}/media/${format}`, { method: 'DELETE' });
 }

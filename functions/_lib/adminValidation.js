@@ -1,4 +1,5 @@
 import { CHARACTER_COLORS, isStaticMediaPath, validateAnimationInput } from './validation.js';
+import { isMediaKey } from './media-store.js';
 
 function stringOrNull(value) {
   const trimmed = typeof value === 'string' ? value.trim() : '';
@@ -48,6 +49,6 @@ export function canPublish(row) {
       && Number.isFinite(Number(row.content_scale))
       && Number(row.content_scale) >= 0.5
       && Number(row.content_scale) <= 2
-      && (isStaticMediaPath(row.gif_url, 'gif') || isStaticMediaPath(row.mp4_url, 'mp4')),
+      && (isMediaKey(row.gif_object_key) || isMediaKey(row.mp4_object_key) || isStaticMediaPath(row.gif_url, 'gif') || isStaticMediaPath(row.mp4_url, 'mp4')),
   );
 }

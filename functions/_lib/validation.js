@@ -35,7 +35,6 @@ export function validateAnimationInput(input, { partial = false } = {}) {
   if (input.contentScale !== undefined && (!Number.isFinite(Number(input.contentScale)) || Number(input.contentScale) < 0.5 || Number(input.contentScale) > 2)) errors.contentScale = 'Content scale must be between 0.5 and 2.';
   if (input.gifPath !== undefined && input.gifPath !== '' && !isStaticMediaPath(input.gifPath, 'gif')) errors.gifPath = `GIF path must be a relative ${STATIC_MEDIA_PREFIX}*.gif path.`;
   if (input.mp4Path !== undefined && input.mp4Path !== '' && !isStaticMediaPath(input.mp4Path, 'mp4')) errors.mp4Path = `MP4 path must be a relative ${STATIC_MEDIA_PREFIX}*.mp4 path.`;
-  if (!partial && !input.gifPath && !input.mp4Path) errors.media = 'Enter at least one GIF or MP4 path.';
   for (const field of ['gifFileSize', 'mp4FileSize']) {
     if (input[field] !== undefined && input[field] !== '' && (!Number.isFinite(Number(input[field])) || Number(input[field]) < 0)) errors[field] = 'File size must be a non-negative number of bytes.';
   }

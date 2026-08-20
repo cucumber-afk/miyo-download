@@ -1,6 +1,6 @@
 # Cloudflare Setup
 
-MiYo Studio runs on Cloudflare Pages with D1 and static media. This project does not require Cloudflare Access, R2, or a Cloudflare payment method.
+MiYo Studio runs on Cloudflare Pages with D1 and Workers KV media storage. This project does not require Cloudflare Access, R2, or a Cloudflare payment method.
 
 ## Cloudflare Resources
 
@@ -18,7 +18,10 @@ MiYo Studio runs on Cloudflare Pages with D1 and static media. This project does
 - D1 binding: `DB`
 - D1 database: `miyo-studio`
 - D1 database ID: `7c7575cb-9b3d-41f6-8d63-e07201cb0a6c`
-- Media: static files under `public/assets/animations/library/`
+- Media storage: Workers KV binding `MEDIA_KV`
+- Uploaded media: GIF max 8 MiB; MP4 max 20 MiB
+- D1 stores metadata and media object keys
+- Legacy static assets remain for bundled Hero and website assets only
 
 `wrangler.toml` contains no R2 binding and no Access variables.
 
@@ -60,14 +63,13 @@ Remove-Item Env:MIYO_ADMIN_PASSWORD
 
 The script hashes the password locally with PBKDF2-SHA256 before writing it to D1. It never logs the password. `MIYO_ADMIN_PASSWORD` must be removed after use.
 
-## Static Media Workflow
+## Runtime Media Uploads
 
-1. Put GIF and MP4 files under `public/assets/animations/library/`.
-2. Sign in at `/admin/login`.
-3. Enter asset paths such as `/assets/animations/library/happy.gif` and save the animation metadata.
-4. Publish the metadata after the static media is included in a Pages build.
+Create the KV namespace once with `npx wrangler kv namespace create MEDIA_KV`, then keep its real ID in `wrangler.toml`. The current namespace ID is `36a5471eb68f4f6a9bed46c970eaccbb`. Do not create another namespace or enable R2. Upload limits are 8 MiB for GIF and 20 MiB for MP4.
+## Legacy Static Media Workflow
 
-Binary media uploads and runtime R2 media endpoints are disabled. Pages serves the media files and D1 stores only the metadata.
+Bundled Hero and website assets may remain under `public/assets/animations/library/`. New Admin animation uploads use `MEDIA_KV` and do not require a rebuild.
+
 
 ## Verification
 
