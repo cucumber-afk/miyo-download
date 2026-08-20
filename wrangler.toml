@@ -1,0 +1,9 @@
+name = "miyo-studio"
+compatibility_date = "2026-08-12"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "miyo-studio"
+database_id = "7c7575cb-9b3d-41f6-8d63-e07201cb0a6c"
+migrations_dir = "migrations"

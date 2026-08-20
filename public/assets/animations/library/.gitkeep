@@ -1,0 +1,3 @@
+# Static media directory
+
+Place real GIF and MP4 files for published animations in this directory. Metadata remains in D1; this directory is served by Cloudflare Pages.

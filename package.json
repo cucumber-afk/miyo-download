@@ -6,7 +6,13 @@
   "scripts": {
     "dev": "vite --port 5174",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pages:dev": "npm run build && npx wrangler pages dev dist",
+    "db:migrate:local": "npx wrangler d1 migrations apply miyo-studio --local",
+    "db:migrate:remote": "npx wrangler d1 migrations apply miyo-studio --remote",
+    "cf:check": "node scripts/cloudflare-local-check.mjs",
+    "cf:config:check": "node scripts/check-cloudflare-config.mjs",
+    "admin:create": "node scripts/create-admin.mjs"
   },
   "dependencies": {
     "lucide-react": "latest",
