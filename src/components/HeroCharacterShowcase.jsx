@@ -20,11 +20,11 @@ function formatPercent(value) {
 }
 
 function formatSlotConfig(slot) {
-  return `{\n  id: '${slot.id}',\n  left: '${slot.left}',\n  top: '${slot.top}',\n  width: '${slot.width}'\n}`;
+  return `{\n  slotId: '${slot.id || slot.slotId}',\n  left: '${slot.left}',\n  top: '${slot.top}',\n  width: '${slot.width}'\n}`;
 }
 
 function DebugSlot({ slot }) {
-  return <div className="hero-animation-slot-debug" style={getSlotStyle(slot)}>{slot.id}</div>;
+  return <div className="hero-animation-slot-debug" style={getSlotStyle(slot)}>{slot.id || slot.slotId}</div>;
 }
 
 function AnimationSlot({ slot }) {
@@ -48,7 +48,7 @@ function AnimationSlot({ slot }) {
 }
 
 function CalibrationPanel({ slots, selectedId, onSelect, onAdjust }) {
-  const selectedSlot = slots.find((slot) => slot.id === selectedId);
+  const selectedSlot = slots.find((slot) => (slot.id || slot.slotId) === selectedId);
   const [copied, setCopied] = useState('');
 
   async function copy(text, label) {
@@ -63,10 +63,10 @@ function CalibrationPanel({ slots, selectedId, onSelect, onAdjust }) {
       <span>Debug only</span>
     </div>
     <div className="hero-calibration-tabs" role="tablist" aria-label="Choose a Hero slot">
-      {slots.map((slot) => <button className={slot.id === selectedId ? 'is-selected' : ''} key={slot.id} onClick={() => onSelect(slot.id)} type="button">{slot.id}</button>)}
+      {slots.map((slot) => <button className={(slot.id || slot.slotId) === selectedId ? 'is-selected' : ''} key={slot.id || slot.slotId} onClick={() => onSelect(slot.id || slot.slotId)} type="button">{slot.id || slot.slotId}</button>)}
     </div>
     <div className="hero-calibration-values">
-      <strong>{selectedSlot.id}</strong>
+      <strong>{selectedSlot.id || selectedSlot.slotId}</strong>
       {SLOT_FIELDS.map((field) => <div key={field}><span>{field}</span><output>{selectedSlot[field]}</output></div>)}
     </div>
     <div className="hero-calibration-controls">
@@ -83,13 +83,31 @@ function CalibrationPanel({ slots, selectedId, onSelect, onAdjust }) {
   </aside>;
 }
 
-export default function HeroCharacterShowcase() {
-  const [selectedId, setSelectedId] = useState(heroAnimationSlots[0].id);
-  const [slotValues, setSlotValues] = useState(() => Object.fromEntries(heroAnimationSlots.map((slot) => [slot.id, Object.fromEntries(SLOT_FIELDS.map((field) => [field, Number.parseFloat(slot[field])]))])));
-  const calibratedSlots = useMemo(() => heroAnimationSlots.map((slot) => ({
+export default function HeroCharacterShowcase({ media = {}, design = {}, previewMode = false }) {
+  const [selectedId, setSelectedId] = useState(heroAnimationSlots[0].slotId);
+  const [slotValues, setSlotValues] = useState(() => Object.fromEntries(heroAnimationSlots.map((slot) => [slot.slotId, Object.fromEntries(SLOT_FIELDS.map((field) => [field, Number.parseFloat(slot[field])]))])));
+
+  const mergedSlots = useMemo(() => {
+    const storedSlots = media.heroAnimationSlots || [];
+    const slotMap = new Map(heroAnimationSlots.map((slot) => [slot.slotId, slot]));
+    for (const stored of storedSlots) {
+      if (slotMap.has(stored.slotId)) {
+        const defaultSlot = slotMap.get(stored.slotId);
+        slotMap.set(stored.slotId, {
+          ...defaultSlot,
+          ...stored,
+          id: stored.slotId,
+          src: stored.mediaKey ? `/api/media?key=${encodeURIComponent(stored.mediaKey)}` : defaultSlot.fallbackSrc
+        });
+      }
+    }
+    return Array.from(slotMap.values());
+  }, [media.heroAnimationSlots]);
+
+  const calibratedSlots = useMemo(() => mergedSlots.map((slot) => ({
     ...slot,
-    ...Object.fromEntries(SLOT_FIELDS.map((field) => [field, formatPercent(slotValues[slot.id][field])])),
-  })), [slotValues]);
+    ...Object.fromEntries(SLOT_FIELDS.map((field) => [field, formatPercent(slotValues[slot.slotId]?.[field] ?? Number.parseFloat(slot[field]))])),
+  })), [mergedSlots, slotValues]);
 
   function adjustSlot(field, amount) {
     setSlotValues((values) => ({
@@ -99,6 +117,7 @@ export default function HeroCharacterShowcase() {
   }
 
   useEffect(() => {
+    if (previewMode) return;
     function handleKeyDown(event) {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
       const action = {
@@ -114,17 +133,18 @@ export default function HeroCharacterShowcase() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, slotValues]);
+  }, [selectedId, slotValues, previewMode]);
 
   const hasEnabledAnimationSlots = calibratedSlots.some((slot) => slot.enabled && slot.src);
+  const showcaseImage = media.characterShowcaseImageKey ? `/api/media?key=${encodeURIComponent(media.characterShowcaseImageKey)}` : '/assets/home/hero-lineup-latest.png';
 
   return <div className="hero-showcase" aria-label="Six MiYo digital characters">
-    <img className="hero-showcase-image" src="/assets/home/hero-lineup-latest.png" alt="Six MiYo characters arranged by color" loading="eager" />
+    <img className="hero-showcase-image" src={showcaseImage} alt="Six MiYo characters arranged by color" loading="eager" />
     {hasEnabledAnimationSlots && <div className="hero-animation-layer" aria-hidden="true">
-      {calibratedSlots.map((slot) => <AnimationSlot key={slot.id} slot={slot} />)}
+      {calibratedSlots.map((slot) => <AnimationSlot key={slot.id || slot.slotId} slot={slot} />)}
       {SHOW_HERO_SLOT_DEBUG && calibratedSlots.map((slot) => <DebugSlot key={`debug-${slot.id}`} slot={slot} />)}
     </div>}
-    {SHOW_HERO_CALIBRATION && <>
+    {SHOW_HERO_CALIBRATION && !previewMode && <>
       <div className="hero-animation-debug-notice">Hero Animation Slot Debug</div>
       <CalibrationPanel slots={calibratedSlots} selectedId={selectedId} onSelect={setSelectedId} onAdjust={adjustSlot} />
     </>}

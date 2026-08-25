@@ -10,7 +10,9 @@ export async function onRequestPost({ params, request, env }) {
   if (!isMediaFormat(format)) return error('Unsupported media format.', 400);
   const row = await env.DB.prepare('SELECT * FROM animations WHERE id = ?').bind(params.id).first();
   if (!row) return error('Animation not found.', 404);
-  const fileName = request.headers.get('X-File-Name') || '';
+  const encodedName = request.headers.get('X-File-Name') || '';
+  let fileName = encodedName;
+  try { fileName = decodeURIComponent(encodedName); } catch { /* Preserve legacy ASCII header values. */ }
   const contentType = request.headers.get('Content-Type') || '';
   const bytes = await request.arrayBuffer();
   const validation = validateMediaBytes(format, fileName, contentType, bytes);

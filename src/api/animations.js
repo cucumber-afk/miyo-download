@@ -21,7 +21,7 @@ export const publishAnimation = (id) => requestJson(`/api/admin/animations/${id}
 export const unpublishAnimation = (id) => requestJson(`/api/admin/animations/${id}/unpublish`, { method: 'POST' });
 
 export function uploadMedia(id, format, file) {
-  return requestJson(`/api/admin/animations/${id}/media/${format}`, { method: 'POST', headers: { 'Content-Type': file.type, 'X-File-Name': file.name }, body: file });
+  return requestJson(`/api/admin/animations/${id}/media/${format}`, { method: 'POST', headers: { 'Content-Type': file.type, 'X-File-Name': encodeURIComponent(file.name) }, body: file });
 }
 
 export function removeMedia(id, format) {

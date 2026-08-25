@@ -11,6 +11,7 @@ if (args.includes('--help')) {
 
 const emailIndex = args.indexOf('--email');
 const email = (emailIndex >= 0 ? args[emailIndex + 1] : args.find((argument) => argument.startsWith('--email='))?.slice(8))?.trim().toLowerCase();
+const isLocal = args.includes('--local');
 const password = process.env.MIYO_ADMIN_PASSWORD;
 
 function bytesToBase64(bytes) { return Buffer.from(bytes).toString('base64'); }
@@ -28,7 +29,7 @@ const id = webcrypto.randomUUID();
 const now = new Date().toISOString();
 const escapedEmail = email.replaceAll("'", "''");
 const sql = `INSERT INTO admins (id, email, password_hash, password_salt, password_iterations, created_at, updated_at) VALUES ('${id}', '${escapedEmail}', '${hash}', '${salt}', ${PBKDF2_ITERATIONS}, '${now}', '${now}') ON CONFLICT(email) DO UPDATE SET password_hash=excluded.password_hash, password_salt=excluded.password_salt, password_iterations=excluded.password_iterations, updated_at=excluded.updated_at;`;
-const wranglerArguments = ['exec', '--', 'wrangler', 'd1', 'execute', 'miyo-studio', '--remote', '--command', sql];
+const wranglerArguments = ['exec', '--', 'wrangler', 'd1', 'execute', 'miyo-studio', isLocal ? '--local' : '--remote', '--command', sql];
 try {
   execFileSync(process.execPath, [process.env.npm_execpath, ...wranglerArguments], { stdio: 'inherit' });
 } catch {

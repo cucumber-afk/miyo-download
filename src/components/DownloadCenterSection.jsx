@@ -1,7 +1,13 @@
-import { MonitorDown, Play, Smartphone, Sparkles } from 'lucide-react';
-import { assets, contentTypes } from '../data/content';
-import { OfficialImage } from './OfficialImage';
+import { ArrowRight } from 'lucide-react';
 
-export default function DownloadCenterSection() {
-  return <section className="download-section"><div className="page-wrap"><div className="section-heading"><div><p className="section-kicker">Your MiYo download center</p><h2>Content made<br /><i>to move.</i></h2></div><p>Discover new animations, expressions, wallpapers and updates for your MiYo digital badge.</p></div><div className="download-feature"><OfficialImage src={assets.downloadCenter} alt="MiYo digital badge download center" /><div><p className="section-kicker">The library is always growing</p><h3>New content, ready when you are.</h3><p>Open the full center to explore official content and future releases.</p></div></div><div className="content-type-grid">{contentTypes.map(({ title, description, tone }, index) => { const Icon = [Play, Sparkles, MonitorDown, Smartphone][index]; return <div key={title} className={`content-type content-type--${tone}`}><span><Icon size={17} /></span><div><h3>{title}</h3><p>{description}</p></div></div>; })}</div></div></section>;
+export default function DownloadCenterSection({ content = {}, design = {} }) {
+  const { sectionTitle = '', sectionTitleHighlight = '', sectionKicker = '', sectionSubtitle = '', buttonText = 'Browse downloads', buttonLink = '/downloads' } = content;
+  const buttonClass = design.buttonStyle === 'outline' ? 'button button--outline' : 'button button--dark';
+  return <section className="download-center-section"><div className="page-wrap">
+    <div className="section-heading">
+      <div>{sectionKicker && <p className="section-kicker">{sectionKicker}</p>}<h2>{sectionTitle}<br />{sectionTitleHighlight && <i>{sectionTitleHighlight}</i>}</h2></div>
+      {sectionSubtitle && <p>{sectionSubtitle}</p>}
+    </div>
+    <div className="download-center-actions"><a className={buttonClass} href={buttonLink || '/downloads'}>{buttonText || 'Browse downloads'} <ArrowRight size={15} /></a></div>
+  </div></section>;
 }

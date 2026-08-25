@@ -1,0 +1,3 @@
+export default function AdminModal({ title, children, cancelLabel = 'Cancel', confirmLabel, tone = 'default', onConfirm, onCancel }) {
+  return <div className="admin-modal-backdrop" role="presentation"><section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title"><h2 id="admin-modal-title">{title}</h2><div className="admin-modal-content">{children}</div><footer><button className="button admin-button-secondary" type="button" onClick={onCancel}>{cancelLabel}</button><button className={`button${tone === 'danger' ? ' admin-button-danger' : ' button--dark'}`} type="button" onClick={onConfirm}>{confirmLabel}</button></footer></section></div>;
+}

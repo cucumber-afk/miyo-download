@@ -2,15 +2,22 @@ import { createMediaStore, isMediaKey } from '../_lib/media-store.js';
 import { error, methodNotAllowed } from '../_lib/response.js';
 
 function sanitizeFileName(value, extension) {
-  const name = String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^[._-]+|[._-]+$/g, '');
+  const name = String(value || '').normalize('NFC').replace(/[\u0000-\u001F\u007F]/g, '').replace(/[\\/]+/g, '-').replace(/^\.+/, '').trim();
   if (!name) return `miyo-animation.${extension}`;
   const withoutExtension = name.replace(/\.(gif|mp4)$/i, '');
-  return `${withoutExtension}.${extension}`;
+  return `${withoutExtension || 'miyo-animation'}.${extension}`;
+}
+
+function asciiFallback(fileName) {
+  const extension = /\.(gif|mp4)$/i.exec(fileName)?.[0].toLowerCase() || '';
+  const baseName = extension ? fileName.slice(0, -extension.length) : fileName;
+  const fallback = baseName.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^[._-]+|[._-]+$/g, '');
+  return `${fallback || 'miyo-animation'}${extension}`;
 }
 
 function attachmentHeader(fileName) {
   const encoded = encodeURIComponent(fileName).replace(/['()*]/g, (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`);
-  return `attachment; filename="${fileName}"; filename*=UTF-8''${encoded}`;
+  return `attachment; filename="${asciiFallback(fileName)}"; filename*=UTF-8''${encoded}`;
 }
 
 export async function onRequestGet({ request, env }) {

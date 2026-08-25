@@ -17,7 +17,13 @@ export async function onRequestPatch({ params, request, env }) {
   const row = await env.DB.prepare('SELECT * FROM animations WHERE id = ?').bind(params.id).first();
   if (!row) return error('Animation not found.', 404);
   const input = await parseJsonRequest(request);
-  const normalized = { ...input, tags: input?.tags ? parseTags(input.tags) : JSON.parse(row.tags_json || '[]'), characterColor: input?.characterColor ?? row.character_color, contentScale: input?.contentScale ?? row.content_scale, gifPath: row.gif_url || '', mp4Path: row.mp4_url || '', gifFileName: row.gif_file_name || '', mp4FileName: row.mp4_file_name || '', gifFileSize: row.gif_file_size ?? '', mp4FileSize: row.mp4_file_size ?? '' };
+  const normalized = { ...input, tags: input?.tags ? parseTags(input.tags) : JSON.parse(row.tags_json || '[]'), characterColor: input?.characterColor ?? row.character_color, contentScale: input?.contentScale ?? row.content_scale };
+  delete normalized.gifPath;
+  delete normalized.mp4Path;
+  delete normalized.gifFileName;
+  delete normalized.mp4FileName;
+  delete normalized.gifFileSize;
+  delete normalized.mp4FileSize;
   const validation = validateAnimationInput(normalized, { partial: false });
   if (!validation.ok) return error('Invalid animation metadata.', 422, validation.errors);
   const now = new Date().toISOString();
