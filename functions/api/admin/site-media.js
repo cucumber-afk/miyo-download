@@ -20,7 +20,8 @@ export async function onRequestPost(context) {
   const file = body.get('file');
   if (!file || typeof file === 'string') return error('File is required.', 400);
   const requestedSection = body.get('section');
-  const section = ['everyday', 'mood', 'seasonal', 'special', 'support/video', 'support/poster'].includes(requestedSection)
+  const allowedSections = ['everyday', 'mood', 'seasonal', 'special', 'support/video', 'support/poster', 'home/featured-video/video', 'home/featured-video/poster'];
+  const section = allowedSections.includes(requestedSection)
     ? requestedSection
     : requestedSection === 'navigation' || requestedSection === 'footer' || requestedSection === 'seo' ? `global/${requestedSection}` : 'hero';
 
@@ -39,11 +40,11 @@ export async function onRequestPost(context) {
   if (!isSiteMediaFormat(format)) {
     return error(`Unsupported file type: .${format}. Supported: png, jpg, jpeg, webp, gif, mp4.`, 400);
   }
-  if (['everyday', 'mood', 'seasonal', 'special', 'support/poster'].includes(requestedSection) && format === 'mp4') {
+  if (['everyday', 'mood', 'seasonal', 'special', 'support/poster', 'home/featured-video/poster'].includes(requestedSection) && format === 'mp4') {
     return error('This image namespace does not support MP4 uploads.', 400);
   }
-  if (requestedSection === 'support/video' && format !== 'mp4') return error('Support video uploads must be MP4.', 400);
-  if (requestedSection === 'support/poster' && !['png', 'jpg', 'jpeg', 'webp'].includes(format)) return error('Support posters must be PNG, JPG, JPEG, or WEBP.', 400);
+  if (['support/video', 'home/featured-video/video'].includes(requestedSection) && format !== 'mp4') return error('Featured video uploads must be MP4.', 400);
+  if (['support/poster', 'home/featured-video/poster'].includes(requestedSection) && !['png', 'jpg', 'jpeg', 'webp'].includes(format)) return error('Featured video posters must be PNG, JPG, JPEG, or WEBP.', 400);
 
   const validation = validateSiteMediaBytes(format, fileName, contentType, bytes);
   if (validation) return error(validation.message, validation.status);

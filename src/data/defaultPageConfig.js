@@ -1,10 +1,11 @@
 export const PAGE_KEYS = ['home', 'downloads', 'characters', 'support'];
 
-export const HOME_SECTION_ORDER = ['hero', 'featuredAnimations', 'characters', 'howItWorks', 'downloadCta', 'expression', 'lifestyle', 'newContent', 'support'];
+export const HOME_SECTION_ORDER = ['hero', 'featuredAnimations', 'featuredVideo', 'characters', 'howItWorks', 'downloadCta', 'expression', 'lifestyle', 'newContent', 'support'];
 
 export const HOME_SECTION_LABELS = {
   hero: 'Hero',
   featuredAnimations: 'Featured Animations',
+  featuredVideo: 'Featured Video',
   characters: 'Characters',
   howItWorks: 'How It Works',
   downloadCta: 'Download CTA',
@@ -126,9 +127,18 @@ export const DEFAULT_PAGE_CONFIG = {
       media: {},
       seo: {},
     },
-    characters: {
+    featuredVideo: {
       enabled: true,
       sortOrder: 2,
+      content: { sectionKicker: 'Featured Video', title: 'Start here', titleHighlight: '', description: 'Explore the basics of your MiYo content library.', buttonText: 'Learn more', buttonLink: '/support' },
+      design: { layoutStyle: 'split', mediaWidth: 'normal', spacing: 'normal', backgroundColor: '' },
+      layout: { enabled: true, sortOrder: 2, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } },
+      media: { videoKey: '', videoUrl: '', posterImageKey: '' },
+      seo: {},
+    },
+    characters: {
+      enabled: true,
+      sortOrder: 3,
       content: {
         sectionTitle: 'A whole world',
         sectionTitleHighlight: 'of MiYo.',
@@ -141,7 +151,7 @@ export const DEFAULT_PAGE_CONFIG = {
       },
       layout: {
         enabled: true,
-        sortOrder: 2,
+        sortOrder: 3,
         visibilityBreakpoints: { desktop: true, tablet: true, mobile: true },
       },
       media: {
@@ -185,7 +195,7 @@ export const DEFAULT_PAGE_CONFIG = {
     },
     downloadCta: {
       enabled: true,
-      sortOrder: 4,
+      sortOrder: 5,
       content: {
         sectionTitle: 'Content made',
         sectionTitleHighlight: 'to move.',
@@ -210,7 +220,7 @@ export const DEFAULT_PAGE_CONFIG = {
     },
     expression: {
       enabled: true,
-      sortOrder: 5,
+      sortOrder: 6,
       content: {
         sectionKicker: 'Growing expression library',
         title: 'Expressions for',
@@ -226,7 +236,7 @@ export const DEFAULT_PAGE_CONFIG = {
     },
     lifestyle: {
       enabled: true,
-      sortOrder: 6,
+      sortOrder: 7,
       content: {
         sectionKicker: 'Made for everyday life',
         title: 'Your MiYo,',
@@ -241,7 +251,7 @@ export const DEFAULT_PAGE_CONFIG = {
     },
     newContent: {
       enabled: true,
-      sortOrder: 7,
+      sortOrder: 8,
       content: {
         sectionKicker: 'Always growing',
         title: "There's always",
@@ -256,7 +266,7 @@ export const DEFAULT_PAGE_CONFIG = {
     },
     support: {
       enabled: true,
-      sortOrder: 8,
+      sortOrder: 9,
       content: {
         sectionKicker: 'Support',
         title: 'Keep your MiYo',
@@ -290,7 +300,7 @@ export const DEFAULT_PAGE_CONFIG = {
     },
     featuredVideo: {
       enabled: true, sortOrder: 1,
-      content: { title: 'Start here', description: 'Explore the basics of your MiYo content library.', buttonText: 'Start here', buttonLink: 'mailto:hello@miyostudio.com' },
+      content: { sectionKicker: 'Featured video', title: 'Start here', titleHighlight: '', description: 'Explore the basics of your MiYo content library.', buttonText: 'Start here', buttonLink: 'mailto:hello@miyostudio.com' },
       design: { layoutStyle: 'split', mediaWidth: 'normal', spacing: 'normal', backgroundColor: '' }, layout: { enabled: true, sortOrder: 1, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } }, media: { videoKey: '', videoUrl: '', posterImageKey: '' }, seo: {},
     },
     faq: {

@@ -3,6 +3,7 @@ import AnimationLibrarySection from '../components/AnimationLibrarySection';
 import CharacterEcosystem from '../components/CharacterEcosystem';
 import DownloadCenterSection from '../components/DownloadCenterSection';
 import ExpressionSection from '../components/ExpressionSection';
+import FeaturedVideoSection from '../components/FeaturedVideoSection';
 import HeroSection from '../components/HeroSection';
 import HowItWorks from '../components/HowItWorks';
 import LifestyleSection from '../components/LifestyleSection';
@@ -29,6 +30,9 @@ export default function Home({ onNavigate }) {
         break;
       case 'featuredAnimations':
         sectionView = <AnimationLibrarySection content={section.content} design={section.design} layout={section.layout} />;
+        break;
+      case 'featuredVideo':
+        sectionView = <FeaturedVideoSection section={section} />;
         break;
       case 'characters':
         sectionView = <CharacterEcosystem content={section.content} design={section.design} media={section.media} />;

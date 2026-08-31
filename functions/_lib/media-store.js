@@ -25,7 +25,7 @@ export function isMediaKey(value) {
 export function isSiteMediaKey(value) {
   return typeof value === 'string'
     && value.startsWith(SITE_MEDIA_PREFIX)
-    && /^site\/(?:home\/(?:hero|global\/(?:navigation|footer|seo))|characters\/(?:everyday|mood|seasonal|special)|support\/(?:video|poster))\/[0-9a-f-]{36}\.(gif|mp4|png|jpe?g|webp)$/i.test(value);
+    && /^site\/(?:home\/(?:hero|featured-video|global\/(?:navigation|footer|seo))|characters\/(?:everyday|mood|seasonal|special)|support\/(?:video|poster))\/[0-9a-f-]{36}\.(gif|mp4|png|jpe?g|webp)$/i.test(value);
 }
 
 export function isValidMediaKey(value) {
@@ -60,7 +60,8 @@ export function createSiteMediaKey(section, format) {
   const globalSection = ['hero', 'global/navigation', 'global/footer', 'global/seo'].includes(section) ? `home/${section}` : null;
   const characterSection = ['everyday', 'mood', 'seasonal', 'special'].includes(section) ? `characters/${section}` : null;
   const supportSection = ['support/video', 'support/poster'].includes(section) ? section : null;
-  const safeSection = globalSection || characterSection || supportSection || 'home/hero';
+  const featuredVideoSection = ['home/featured-video/video', 'home/featured-video/poster'].includes(section) ? 'home/featured-video' : null;
+  const safeSection = globalSection || characterSection || supportSection || featuredVideoSection || 'home/hero';
   return `site/${safeSection}/${crypto.randomUUID()}.${format}`;
 }
 

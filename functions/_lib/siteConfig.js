@@ -1,6 +1,7 @@
 import { DOWNLOADS_CATEGORY_OPTIONS, DOWNLOADS_SORT_OPTIONS, HOME_FEATURED_LIMIT_OPTIONS, HOME_HOW_STEP_COUNT, PAGE_KEYS } from './pageConfigConstants.js';
 import { isSiteMediaKey } from './media-store.js';
 import { DEFAULT_PAGE_CONFIG_BACKEND } from './pageConfigDefaults.js';
+import { parseYouTubeVideoId } from '../../shared/video-url.js';
 
 const MAX_TEXT_LENGTH = 200;
 const MAX_LONG_TEXT_LENGTH = 600;
@@ -43,6 +44,16 @@ function isHttpUrl(value) {
   try {
     const url = new URL(value);
     return url.protocol === 'https:' || url.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
+
+function isDirectMp4Url(value) {
+  if (!isHttpUrl(value)) return false;
+  try {
+    const url = new URL(value);
+    return url.pathname.toLowerCase().endsWith('.mp4');
   } catch {
     return false;
   }
@@ -215,11 +226,11 @@ function sanitizeSupportPageHero(content) {
   return { sectionKicker: sanitizeString(content.sectionKicker, { maxLength: 80 }), title: sanitizeString(content.title, { maxLength: 80 }), titleHighlight: sanitizeString(content.titleHighlight, { maxLength: 80 }), description: sanitizeString(content.description, { maxLength: MAX_LONG_TEXT_LENGTH }) };
 }
 
-function sanitizeSupportPageVideo(content) {
+function sanitizeFeaturedVideoContent(content) {
   if (!content || typeof content !== 'object') return null;
   const buttonLink = sanitizeSupportPageLink(content.buttonLink);
   if (buttonLink === null) return null;
-  return { title: sanitizeString(content.title, { maxLength: 80 }), description: sanitizeString(content.description, { maxLength: MAX_LONG_TEXT_LENGTH }), buttonText: sanitizeString(content.buttonText, { maxLength: 80 }), buttonLink };
+  return { sectionKicker: sanitizeString(content.sectionKicker, { maxLength: 80 }), title: sanitizeString(content.title, { maxLength: 80 }), titleHighlight: sanitizeString(content.titleHighlight, { maxLength: 80 }), description: sanitizeString(content.description, { maxLength: MAX_LONG_TEXT_LENGTH }), buttonText: sanitizeString(content.buttonText, { maxLength: 80 }), buttonLink };
 }
 
 function sanitizeSupportFaq(content) {
@@ -281,15 +292,21 @@ function sanitizeSectionImageMedia(media, fallbackAlt) {
   return { imageKey, imageAlt: sanitizeString(media.imageAlt, { maxLength: 160 }) || fallbackAlt };
 }
 
-function sanitizeSupportMedia(media) {
+function sanitizeFeaturedVideoMedia(media, pageKey = 'support') {
   if (!media || typeof media !== 'object') return null;
   const videoKey = sanitizeString(media.videoKey, { maxLength: 200 });
   const posterImageKey = sanitizeString(media.posterImageKey, { maxLength: 200 });
   const rawVideoUrl = sanitizeString(media.videoUrl, { maxLength: MAX_LINK_LENGTH });
-  const videoUrl = rawVideoUrl === '' ? '' : (isSafePath(rawVideoUrl) ? rawVideoUrl : null);
+  const videoUrl = rawVideoUrl === '' || parseYouTubeVideoId(rawVideoUrl) || isDirectMp4Url(rawVideoUrl) ? rawVideoUrl : null;
   if (videoUrl === null) return null;
-  if (videoKey && !/^site\/support\/video\/[0-9a-f-]{36}\.mp4$/i.test(videoKey)) return null;
-  if (posterImageKey && !/^site\/support\/poster\/[0-9a-f-]{36}\.(png|jpe?g|webp)$/i.test(posterImageKey)) return null;
+  const videoPattern = pageKey === 'home'
+    ? /^site\/home\/featured-video\/[0-9a-f-]{36}\.mp4$/i
+    : /^site\/support\/video\/[0-9a-f-]{36}\.mp4$/i;
+  const posterPattern = pageKey === 'home'
+    ? /^site\/home\/featured-video\/[0-9a-f-]{36}\.(png|jpe?g|webp)$/i
+    : /^site\/support\/poster\/[0-9a-f-]{36}\.(png|jpe?g|webp)$/i;
+  if (videoKey && !videoPattern.test(videoKey)) return null;
+  if (posterImageKey && !posterPattern.test(posterImageKey)) return null;
   return { videoKey, videoUrl, posterImageKey };
 }
 
@@ -347,6 +364,7 @@ const SANITIZERS = {
     lifestyle: sanitizeLifestyleContent,
     newContent: sanitizeNewContentContent,
     support: sanitizeSupportContent,
+    featuredVideo: sanitizeFeaturedVideoContent,
   },
   characters: {
     header: sanitizeCharactersHeaderContent,
@@ -354,7 +372,7 @@ const SANITIZERS = {
   },
   support: {
     hero: sanitizeSupportPageHero,
-    featuredVideo: sanitizeSupportPageVideo,
+    featuredVideo: sanitizeFeaturedVideoContent,
     faq: sanitizeSupportFaq,
     contactCta: sanitizeSupportContact,
   },
@@ -515,6 +533,16 @@ function sanitizeDownloadCtaDesign(design) {
   };
 }
 
+function sanitizeFeaturedVideoDesign(design) {
+  if (!design || typeof design !== 'object') return null;
+  return {
+    layoutStyle: design.layoutStyle === 'stack' ? 'stack' : 'split',
+    mediaWidth: ['narrow', 'normal', 'wide'].includes(design.mediaWidth) ? design.mediaWidth : 'normal',
+    spacing: ALLOWED_PADDINGS.has(design.spacing) ? design.spacing : 'normal',
+    backgroundColor: sanitizeHexColor(design.backgroundColor),
+  };
+}
+
 function sanitizeHomeFlexibleDesign(design, layoutStyle = 'split') {
   if (!design || typeof design !== 'object') return null;
   return {
@@ -639,6 +667,7 @@ const DESIGN_SANITIZERS = {
     lifestyle: (design) => sanitizeHomeFlexibleDesign(design, 'split'),
     newContent: (design) => sanitizeHomeFlexibleDesign(design, 'split'),
     support: (design) => sanitizeHomeFlexibleDesign(design, 'grid'),
+    featuredVideo: (design) => sanitizeFeaturedVideoDesign(design),
   },
   characters: {
     header: (design) => sanitizeHomeFlexibleDesign(design, 'split'),
@@ -670,7 +699,7 @@ const MEDIA_SANITIZERS = {
     expression: (media) => sanitizeSectionImageMedia(media, 'MiYo surrounded by expression ideas'),
     lifestyle: (media) => sanitizeSectionImageMedia(media, 'MiYo digital badge in everyday life'),
     newContent: () => ({}),
-    support: sanitizeSupportMedia,
+    featuredVideo: (media) => sanitizeFeaturedVideoMedia(media, 'home'),
   },
   characters: {
     header: () => ({}),
@@ -678,7 +707,7 @@ const MEDIA_SANITIZERS = {
   },
   support: {
     hero: () => ({}),
-    featuredVideo: sanitizeSupportMedia,
+    featuredVideo: sanitizeFeaturedVideoMedia,
     faq: () => ({}),
     contactCta: () => ({}),
   },

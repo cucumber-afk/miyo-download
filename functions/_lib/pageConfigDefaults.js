@@ -79,9 +79,18 @@ export const DEFAULT_PAGE_CONFIG_BACKEND = {
       media: {},
       seo: {},
     },
-    characters: {
+    featuredVideo: {
       enabled: true,
       sortOrder: 2,
+      content: { sectionKicker: 'Featured Video', title: 'Start here', titleHighlight: '', description: 'Explore the basics of your MiYo content library.', buttonText: 'Learn more', buttonLink: '/support' },
+      design: { layoutStyle: 'split', mediaWidth: 'normal', spacing: 'normal', backgroundColor: '' },
+      layout: { enabled: true, sortOrder: 2, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } },
+      media: { videoKey: '', videoUrl: '', posterImageKey: '' },
+      seo: {},
+    },
+    characters: {
+      enabled: true,
+      sortOrder: 3,
       content: {
         sectionTitle: 'A whole world',
         sectionTitleHighlight: 'of MiYo.',
@@ -94,7 +103,7 @@ export const DEFAULT_PAGE_CONFIG_BACKEND = {
       },
       layout: {
         enabled: true,
-        sortOrder: 2,
+        sortOrder: 3,
         visibilityBreakpoints: { desktop: true, tablet: true, mobile: true },
       },
       media: {
@@ -110,7 +119,7 @@ export const DEFAULT_PAGE_CONFIG_BACKEND = {
     },
     howItWorks: {
       enabled: true,
-      sortOrder: 3,
+      sortOrder: 4,
       content: {
         sectionTitle: 'Make it',
         sectionTitleHighlight: 'yours.',
@@ -130,7 +139,7 @@ export const DEFAULT_PAGE_CONFIG_BACKEND = {
       },
       layout: {
         enabled: true,
-        sortOrder: 3,
+        sortOrder: 4,
         visibilityBreakpoints: { desktop: true, tablet: true, mobile: true },
       },
       media: {},
@@ -138,7 +147,7 @@ export const DEFAULT_PAGE_CONFIG_BACKEND = {
     },
     downloadCta: {
       enabled: true,
-      sortOrder: 4,
+      sortOrder: 5,
       content: {
         sectionTitle: 'Content made',
         sectionTitleHighlight: 'to move.',
@@ -153,7 +162,7 @@ export const DEFAULT_PAGE_CONFIG_BACKEND = {
       },
       layout: {
         enabled: true,
-        sortOrder: 4,
+        sortOrder: 5,
         visibilityBreakpoints: { desktop: true, tablet: true, mobile: true },
       },
       media: {
@@ -163,37 +172,37 @@ export const DEFAULT_PAGE_CONFIG_BACKEND = {
     },
     expression: {
       enabled: true,
-      sortOrder: 5,
+      sortOrder: 6,
       content: { sectionKicker: 'Growing expression library', title: 'Expressions for', titleHighlight: 'every mood.', description: 'Discover an ever-growing collection of animations and expressions made for your MiYo.', tags: ['Happy', 'Sleepy', 'Love', 'Funny', 'Cool', 'Surprised', 'Seasonal', 'More'], note: 'New content added regularly.' },
       design: { layoutStyle: 'split', contentAlignment: 'left', spacing: 'normal', backgroundColor: '' },
-      layout: { enabled: true, sortOrder: 5, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } },
+      layout: { enabled: true, sortOrder: 6, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } },
       media: { imageKey: '', imageAlt: 'MiYo surrounded by expression ideas' },
       seo: {},
     },
     lifestyle: {
       enabled: true,
-      sortOrder: 6,
+      sortOrder: 7,
       content: { sectionKicker: 'Made for everyday life', title: 'Your MiYo,', titleHighlight: 'always with you.', description: 'A tiny digital companion for every moment.', scenes: ['On Your Bag', 'On Your Desk', 'At Home', 'On the Go'] },
       design: { layoutStyle: 'split', contentAlignment: 'left', spacing: 'normal', backgroundColor: '' },
-      layout: { enabled: true, sortOrder: 6, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } },
+      layout: { enabled: true, sortOrder: 7, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } },
       media: { imageKey: '', imageAlt: 'MiYo digital badge in everyday life' },
       seo: {},
     },
     newContent: {
       enabled: true,
-      sortOrder: 7,
+      sortOrder: 8,
       content: { sectionKicker: 'Always growing', title: "There's always", titleHighlight: 'something new.', description: 'The MiYo library keeps growing with new expressions, seasonal drops and special collections.', items: ['New Expressions', 'Seasonal Drops', 'Special Packs', 'More Coming Soon'] },
       design: { layoutStyle: 'split', contentAlignment: 'left', spacing: 'normal', backgroundColor: '' },
-      layout: { enabled: true, sortOrder: 7, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } },
+      layout: { enabled: true, sortOrder: 8, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } },
       media: {},
       seo: {},
     },
     support: {
       enabled: true,
-      sortOrder: 8,
+      sortOrder: 9,
       content: { sectionKicker: 'Support', title: 'Keep your MiYo', titleHighlight: 'in motion.', description: 'Setup guidance and answers for your digital companion.', cardTitle: 'Start here', cardDescription: 'Explore the basics of your MiYo content library.', cardButtonText: 'Start here', cardButtonLink: 'mailto:hello@miyostudio.com', faqLabel: 'Support topics', faqs: [{ question: 'Getting Started', answer: 'A simple place to begin exploring the MiYo content library.' }, { question: 'How to Transfer Content', answer: 'Download official content, then use your MiYo transfer workflow to move it to the badge.' }, { question: 'FAQ', answer: 'Find answers about content, updates, and the growing library here.' }], contactLabel: 'Need more help?', contactTitle: 'Contact MiYo Studio', contactEmail: 'hello@miyostudio.com' },
       design: { layoutStyle: 'grid', contentAlignment: 'left', spacing: 'normal', backgroundColor: '' },
-      layout: { enabled: true, sortOrder: 8, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } },
+      layout: { enabled: true, sortOrder: 9, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } },
       media: { videoKey: '', posterImageKey: '' },
       seo: {},
     },
@@ -211,7 +220,7 @@ export const DEFAULT_PAGE_CONFIG_BACKEND = {
     featuredVideo: {
       enabled: true,
       sortOrder: 1,
-      content: { title: 'Start here', description: 'Explore the basics of your MiYo content library.', buttonText: 'Start here', buttonLink: 'mailto:hello@miyostudio.com' },
+      content: { sectionKicker: 'Featured video', title: 'Start here', titleHighlight: '', description: 'Explore the basics of your MiYo content library.', buttonText: 'Start here', buttonLink: 'mailto:hello@miyostudio.com' },
       design: { layoutStyle: 'split', mediaWidth: 'normal', spacing: 'normal', backgroundColor: '' },
       layout: { enabled: true, sortOrder: 1, visibilityBreakpoints: { desktop: true, tablet: true, mobile: true } },
       media: { videoKey: '', videoUrl: '', posterImageKey: '' },

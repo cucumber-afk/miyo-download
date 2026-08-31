@@ -1,6 +1,7 @@
 import { ArrowRight, ChevronDown, Heart, Play } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { usePublicSiteConfig } from '../hooks/useSiteConfig';
+import FeaturedVideoSection from '../components/FeaturedVideoSection';
 
 function LegacySupport({ content = {}, design = {} }) {
   const [open, setOpen] = useState(0);
@@ -21,13 +22,6 @@ function Hero({ section }) {
   return <main className="page-wrap page-section support-page support-hero" data-content-alignment={design.contentAlignment || 'left'} data-spacing={design.spacing || 'normal'} style={design.backgroundColor ? { '--cms-background-color': design.backgroundColor } : undefined}><div className="section-heading"><div><p className="section-kicker">{content.sectionKicker}</p><h1>{content.title}<br /><i>{content.titleHighlight}</i></h1></div><p>{content.description}</p></div></main>;
 }
 
-function FeaturedVideo({ section }) {
-  const { content = {}, design = {}, media = {} } = section;
-  const src = media.videoKey ? `/api/media?key=${encodeURIComponent(media.videoKey)}` : media.videoUrl || '';
-  const poster = media.posterImageKey ? `/api/media?key=${encodeURIComponent(media.posterImageKey)}` : undefined;
-  return <section className="page-wrap support-video-section" data-layout-style={design.layoutStyle || 'split'} data-media-width={design.mediaWidth || 'normal'} data-spacing={design.spacing || 'normal'} style={design.backgroundColor ? { '--cms-background-color': design.backgroundColor } : undefined}><div className="support-video-copy"><p className="section-kicker">Featured video</p><h2>{content.title}</h2><p>{content.description}</p><a className="button button--dark" href={content.buttonLink || '#'}>{content.buttonText || 'Learn more'}</a></div><div className="support-video-frame">{src ? <video controls playsInline preload="metadata" poster={poster} src={src}>Your browser does not support video playback.</video> : <div className="support-video-fallback"><Play size={22} fill="currentColor" /><span>MiYo support video</span></div>}</div></section>;
-}
-
 function Faq({ section }) {
   const [open, setOpen] = useState(-1);
   const { content = {}, design = {} } = section;
@@ -45,5 +39,5 @@ export default function Support({ standalone = false, content = {}, design = {},
   if (!standalone) return <LegacySupport content={content} design={design} media={media} />;
   const { sections } = usePublicSiteConfig('support');
   const enabledSections = Object.values(sections || {}).filter((section) => section.enabled).sort((a, b) => a.sortOrder - b.sortOrder);
-  return <>{enabledSections.map((section) => <CmsSection key={section.sectionKey} section={section}>{section.sectionKey === 'hero' && <Hero section={section} />}{section.sectionKey === 'featuredVideo' && <FeaturedVideo section={section} />}{section.sectionKey === 'faq' && <Faq section={section} />}{section.sectionKey === 'contactCta' && <ContactCta section={section} />}</CmsSection>)}</>;
+  return <>{enabledSections.map((section) => <CmsSection key={section.sectionKey} section={section}>{section.sectionKey === 'hero' && <Hero section={section} />}{section.sectionKey === 'featuredVideo' && <FeaturedVideoSection section={section} />}{section.sectionKey === 'faq' && <Faq section={section} />}{section.sectionKey === 'contactCta' && <ContactCta section={section} />}</CmsSection>)}</>;
 }

@@ -6,29 +6,28 @@ import { createMediaStore } from '../../../_lib/media-store.js';
 import { collectReferencedSiteMediaKeysFromRows, collectReferencedSiteMediaKeysFromGlobalConfigRows } from '../../../_lib/siteMediaRefCollector.js';
 
 function mergeWithDefaults(pageKey, rows) {
-  const sections = {};
   const defaultPage = getDefaultPageConfigBackend(pageKey);
-  if (defaultPage?.sections?.length) {
-    for (const section of defaultPage.sections) sections[section.sectionKey] = { ...section };
-  }
+  const sections = new Map((defaultPage?.sections || []).map((section) => [section.sectionKey, { ...section }]));
   for (const row of rows || []) {
     const parsed = rowToSection(row);
-    const defaultSection = sections[parsed.sectionKey] || {};
+    const defaultSection = sections.get(parsed.sectionKey) || {};
+    const savedContent = parsed.content && typeof parsed.content === 'object' && !Array.isArray(parsed.content) ? parsed.content : {};
+    const defaultContent = defaultSection.content && typeof defaultSection.content === 'object' && !Array.isArray(defaultSection.content) ? defaultSection.content : {};
     const content = parsed.sectionKey === 'collectionGrid' && pageKey === 'characters'
-      ? { ...(defaultSection.content || {}), ...(parsed.content || {}), collections: (defaultSection.content?.collections || []).map((item) => ({ ...item, ...(parsed.content?.collections || []).find((override) => override.slotId === item.slotId) })) }
-      : { ...(defaultSection.content || {}), ...(parsed.content || {}) };
-    sections[parsed.sectionKey] = {
+      ? { ...defaultContent, ...savedContent, collections: (defaultContent.collections || []).map((item) => ({ ...item, ...(Array.isArray(savedContent.collections) ? savedContent.collections : []).find((override) => override?.slotId === item.slotId) })) }
+      : { ...defaultContent, ...savedContent };
+    sections.set(parsed.sectionKey, {
       sectionKey: parsed.sectionKey,
       enabled: parsed.enabled,
       sortOrder: parsed.sortOrder,
       content,
-      design: { ...(defaultSection.design || {}), ...parsed.design },
-      layout: { ...(defaultSection.layout || {}), ...parsed.layout },
-      media: { ...(defaultSection.media || {}), ...parsed.media },
-      seo: { ...(defaultSection.seo || {}), ...parsed.seo },
-    };
+      design: { ...(defaultSection.design || {}), ...(parsed.design && typeof parsed.design === 'object' && !Array.isArray(parsed.design) ? parsed.design : {}) },
+      layout: { ...(defaultSection.layout || {}), ...(parsed.layout && typeof parsed.layout === 'object' && !Array.isArray(parsed.layout) ? parsed.layout : {}) },
+      media: { ...(defaultSection.media || {}), ...(parsed.media && typeof parsed.media === 'object' && !Array.isArray(parsed.media) ? parsed.media : {}) },
+      seo: { ...(defaultSection.seo || {}), ...(parsed.seo && typeof parsed.seo === 'object' && !Array.isArray(parsed.seo) ? parsed.seo : {}) },
+    });
   }
-  return { pageKey, sections };
+  return { pageKey, sections: Array.from(sections.values()) };
 }
 
 export async function onRequestGet({ request, env, params }) {

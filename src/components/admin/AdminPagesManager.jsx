@@ -132,12 +132,48 @@ function defaultSectionsFor(pageKey) {
     sectionKey,
     enabled: value.enabled,
     sortOrder: value.sortOrder,
-    content: value.content,
+    content: value.content || {},
     design: value.design || {},
     layout: value.layout || {},
     media: value.media || {},
     seo: value.seo || {},
   }));
+}
+
+function sectionEntries(value) {
+  if (Array.isArray(value)) return value;
+  if (value && typeof value === 'object') return Object.values(value);
+  return [];
+}
+
+function mergeSectionWithDefault(defaultSection, section) {
+  const defaultContent = defaultSection?.content || {};
+  const savedContent = section?.content && typeof section.content === 'object' && !Array.isArray(section.content) ? section.content : {};
+  const content = { ...defaultContent, ...savedContent };
+  if (section?.sectionKey === 'faq' && Array.isArray(defaultContent.faqs)) {
+    const savedFaqs = Array.isArray(savedContent.faqs) ? savedContent.faqs : [];
+    content.faqs = defaultContent.faqs.map((faq, index) => ({ ...faq, ...(savedFaqs[index] || {}) }));
+  }
+  return {
+    sectionKey: section?.sectionKey || defaultSection?.sectionKey,
+    enabled: section?.enabled ?? defaultSection?.enabled ?? true,
+    sortOrder: section?.sortOrder ?? defaultSection?.sortOrder ?? 0,
+    content,
+    design: { ...(defaultSection?.design || {}), ...(section?.design || {}) },
+    layout: { ...(defaultSection?.layout || {}), ...(section?.layout || {}) },
+    media: { ...(defaultSection?.media || {}), ...(section?.media || {}) },
+    seo: { ...(defaultSection?.seo || {}), ...(section?.seo || {}) },
+  };
+}
+
+function mergePageSections(pageKey, value) {
+  const defaults = defaultSectionsFor(pageKey);
+  const byKey = new Map(defaults.map((section) => [section.sectionKey, section]));
+  for (const section of sectionEntries(value)) {
+    if (!section?.sectionKey) continue;
+    byKey.set(section.sectionKey, mergeSectionWithDefault(byKey.get(section.sectionKey) || {}, section));
+  }
+  return Array.from(byKey.values());
 }
 
 function moveSection(sections, key, direction) {
@@ -582,12 +618,62 @@ function SupportHeroEditor({ content, onChange }) {
   return <div className="admin-editor-form"><Field label="Section Kicker"><input value={content.sectionKicker || ''} onChange={(event) => set('sectionKicker', event.target.value)} /></Field><div className="admin-field-row"><Field label="Title"><input value={content.title || ''} onChange={(event) => set('title', event.target.value)} /></Field><Field label="Title Highlight"><input value={content.titleHighlight || ''} onChange={(event) => set('titleHighlight', event.target.value)} /></Field></div><Field label="Description"><textarea rows={4} value={content.description || ''} onChange={(event) => set('description', event.target.value)} /></Field></div>;
 }
 
-function SupportVideoEditor({ section, onChange, onChangeMedia }) {
-  const content = section.content || {};
-  const media = section.media || {};
+function SupportVideoContentEditor({ content, onChange }) {
   const set = (field, value) => onChange({ ...content, [field]: value });
-  const upload = async (file, kind) => { if (!file) return; try { const result = await uploadSiteMedia(file, `support/${kind}`); addPendingUpload(result.mediaKey); onChangeMedia({ ...media, [kind === 'video' ? 'videoKey' : 'posterImageKey']: result.mediaKey }); } catch (error) { window.alert(error.message || 'Upload failed.'); } };
-  return <div className="admin-editor-form"><Field label="Title"><input value={content.title || ''} onChange={(event) => set('title', event.target.value)} /></Field><Field label="Description"><textarea rows={3} value={content.description || ''} onChange={(event) => set('description', event.target.value)} /></Field><div className="admin-field-row"><Field label="Button Text"><input value={content.buttonText || ''} onChange={(event) => set('buttonText', event.target.value)} /></Field><Field label="Button Link"><input value={content.buttonLink || ''} onChange={(event) => set('buttonLink', event.target.value)} /></Field></div><Field label="External Video URL"><input value={media.videoUrl || ''} onChange={(event) => onChangeMedia({ ...media, videoUrl: event.target.value })} placeholder="https://..." /></Field><div className="admin-media-preview-area"><p className="section-kicker">Video</p>{media.videoKey && <video className="admin-media-preview-image" controls src={`/api/media?key=${encodeURIComponent(media.videoKey)}`} poster={media.posterImageKey ? `/api/media?key=${encodeURIComponent(media.posterImageKey)}` : undefined} />}<input type="file" accept="video/mp4" onChange={(event) => upload(event.target.files?.[0], 'video')} /><button type="button" className="admin-button-ghost" onClick={() => onChangeMedia({ ...media, videoKey: '' })}>Use Default</button></div><div className="admin-media-preview-area"><p className="section-kicker">Poster</p>{media.posterImageKey && <img className="admin-media-preview-image" src={`/api/media?key=${encodeURIComponent(media.posterImageKey)}`} alt="Support video poster" />}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => upload(event.target.files?.[0], 'poster')} /><button type="button" className="admin-button-ghost" onClick={() => onChangeMedia({ ...media, posterImageKey: '' })}>Use Default</button></div></div>;
+  return <div className="admin-editor-form">
+    <Field label="Section Kicker"><input value={content.sectionKicker || ''} onChange={(event) => set('sectionKicker', event.target.value)} /></Field>
+    <div className="admin-field-row"><Field label="Title"><input value={content.title || ''} onChange={(event) => set('title', event.target.value)} /></Field><Field label="Title Highlight"><input value={content.titleHighlight || ''} onChange={(event) => set('titleHighlight', event.target.value)} /></Field></div>
+    <Field label="Description"><textarea rows={4} value={content.description || ''} onChange={(event) => set('description', event.target.value)} /></Field>
+    <div className="admin-field-row"><Field label="Button Text"><input value={content.buttonText || ''} onChange={(event) => set('buttonText', event.target.value)} /></Field><Field label="Button Link"><input value={content.buttonLink || ''} onChange={(event) => set('buttonLink', event.target.value)} /></Field></div>
+  </div>;
+}
+
+function SupportVideoDesignEditor({ design, onChange }) {
+  const set = (field, value) => onChange({ ...design, [field]: value });
+  return <div className="admin-editor-form">
+    <div className="admin-field-row"><Field label="Layout Style"><select value={design.layoutStyle || 'split'} onChange={(event) => set('layoutStyle', event.target.value)}><option value="split">Split</option><option value="stack">Stack</option></select></Field><Field label="Media Width"><select value={design.mediaWidth || 'normal'} onChange={(event) => set('mediaWidth', event.target.value)}><option value="narrow">Narrow</option><option value="normal">Normal</option><option value="wide">Wide</option></select></Field></div>
+    <div className="admin-field-row"><Field label="Spacing"><select value={design.spacing || 'normal'} onChange={(event) => set('spacing', event.target.value)}><option value="compact">Compact</option><option value="normal">Normal</option><option value="spacious">Spacious</option></select></Field><Field label="Background Color"><input value={design.backgroundColor || ''} onChange={(event) => set('backgroundColor', event.target.value)} placeholder="#FFFFFF" /></Field></div>
+  </div>;
+}
+
+function FeaturedVideoMediaEditor({ media, onChange, savedMedia, pageKey }) {
+  const videoInputRef = useRef(null);
+  const posterInputRef = useRef(null);
+  const [uploading, setUploading] = useState('');
+  const [error, setError] = useState('');
+  const upload = async (file, kind) => {
+    if (!file) return;
+    setUploading(kind);
+    setError('');
+    try {
+      const result = await uploadSiteMedia(file, `${pageKey}/featured-video/${kind}`);
+      addPendingUpload(result.mediaKey);
+      onChange({ ...media, [kind === 'video' ? 'videoKey' : 'posterImageKey']: result.mediaKey });
+    } catch (uploadError) {
+      setError(uploadError.message || 'Upload failed.');
+    } finally {
+      setUploading('');
+    }
+  };
+  const hasUnsavedUpload = media.videoKey !== (savedMedia?.videoKey || '') || media.posterImageKey !== (savedMedia?.posterImageKey || '');
+  return <div className="admin-editor-form">
+    <Field label="External Video URL" note="Supports YouTube watch links, youtu.be links, or direct MP4 URLs."><input value={media.videoUrl || ''} onChange={(event) => onChange({ ...media, videoUrl: event.target.value })} placeholder="https://www.youtube.com/watch?v=..." /></Field>
+    {error && <p className="admin-field-error">{error}</p>}
+    {hasUnsavedUpload && <p className="admin-field-warning">Uploaded media will be lost if you leave without saving.</p>}
+    <div className="admin-media-preview-area"><p className="section-kicker">Uploaded Video</p><p className="admin-field-hint">{media.videoKey ? `Current Video: ${media.videoKey}` : 'Current Video: Default'}</p>{media.videoKey && <video className="admin-media-preview-image" controls src={`/api/media?key=${encodeURIComponent(media.videoKey)}`} poster={media.posterImageKey ? `/api/media?key=${encodeURIComponent(media.posterImageKey)}` : undefined} />}<input ref={videoInputRef} type="file" accept="video/mp4" onChange={(event) => upload(event.target.files?.[0], 'video')} style={{ display: 'none' }} /><div className="admin-media-actions"><button type="button" className="button button--dark" onClick={() => videoInputRef.current?.click()} disabled={Boolean(uploading)}>{uploading === 'video' ? 'Uploading...' : media.videoKey ? 'Replace MP4' : 'Upload MP4'}</button>{media.videoKey && <button type="button" className="admin-button-ghost is-danger" onClick={() => onChange({ ...media, videoKey: '' })}>Use Default / Remove</button>}</div></div>
+    <div className="admin-media-preview-area"><p className="section-kicker">Poster Image</p><p className="admin-field-hint">{media.posterImageKey ? `Current Poster: ${media.posterImageKey}` : 'Current Poster: Default'}</p>{media.posterImageKey && <img className="admin-media-preview-image" src={`/api/media?key=${encodeURIComponent(media.posterImageKey)}`} alt="Support video poster" />}<input ref={posterInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => upload(event.target.files?.[0], 'poster')} style={{ display: 'none' }} /><div className="admin-media-actions"><button type="button" className="button button--dark" onClick={() => posterInputRef.current?.click()} disabled={Boolean(uploading)}>{uploading === 'poster' ? 'Uploading...' : media.posterImageKey ? 'Replace Poster' : 'Upload Poster'}</button>{media.posterImageKey && <button type="button" className="admin-button-ghost is-danger" onClick={() => onChange({ ...media, posterImageKey: '' })}>Use Default / Remove</button>}</div></div>
+  </div>;
+}
+
+function FeaturedVideoEditor({ section, pageKey, onChange, onChangeDesign, onChangeMedia, savedSection }) {
+  const [activeTab, setActiveTab] = useState('content');
+  const content = section.content || {};
+  const design = section.design || {};
+  const media = section.media || {};
+  return <div className="admin-hero-editor">
+    <div className="admin-tabs"><button type="button" className={activeTab === 'content' ? 'admin-tab is-active' : 'admin-tab'} onClick={() => setActiveTab('content')}>Content</button><button type="button" className={activeTab === 'design' ? 'admin-tab is-active' : 'admin-tab'} onClick={() => setActiveTab('design')}>Design</button><button type="button" className={activeTab === 'media' ? 'admin-tab is-active' : 'admin-tab'} onClick={() => setActiveTab('media')}>Media</button></div>
+    <div className="admin-tab-content">{activeTab === 'content' && <SupportVideoContentEditor content={content} onChange={onChange} />}{activeTab === 'design' && <SupportVideoDesignEditor design={design} onChange={onChangeDesign} />}{activeTab === 'media' && <FeaturedVideoMediaEditor media={media} onChange={onChangeMedia} savedMedia={savedSection?.media} pageKey={pageKey} />}</div>
+  </div>;
 }
 
 function SupportFaqEditor({ content, onChange }) {
@@ -721,7 +807,7 @@ function renderCmsContentEditor(section, props) {
   if (section.sectionKey === 'lifestyle') return <><SimpleSectionEditor content={{ sectionKicker: content.sectionKicker, sectionTitle: content.title, sectionTitleHighlight: content.titleHighlight, sectionSubtitle: content.description }} onChange={(next) => onChange({ ...content, sectionKicker: next.sectionKicker, title: next.sectionTitle, titleHighlight: next.sectionTitleHighlight, description: next.sectionSubtitle })} /><StringListEditor label="Scenes" values={content.scenes} onChange={(scenes) => onChange({ ...content, scenes })} /></>;
   if (section.sectionKey === 'newContent') return <><SimpleSectionEditor content={{ sectionKicker: content.sectionKicker, sectionTitle: content.title, sectionTitleHighlight: content.titleHighlight, sectionSubtitle: content.description }} onChange={(next) => onChange({ ...content, sectionKicker: next.sectionKicker, title: next.sectionTitle, titleHighlight: next.sectionTitleHighlight, description: next.sectionSubtitle })} /><StringListEditor label="Content Items" values={content.items} onChange={(items) => onChange({ ...content, items })} /></>;
   if (props.pageKey === 'support' && section.sectionKey === 'hero') return <SupportHeroEditor content={content} onChange={onChange} />;
-  if (props.pageKey === 'support' && section.sectionKey === 'featuredVideo') return <SupportVideoEditor section={section} onChange={onChange} onChangeMedia={props.onChangeMedia} />;
+  if (['home', 'support'].includes(props.pageKey) && section.sectionKey === 'featuredVideo') return <FeaturedVideoEditor section={section} pageKey={props.pageKey} onChange={onChange} onChangeDesign={props.onChangeDesign} onChangeMedia={props.onChangeMedia} savedSection={props.savedSection} />;
   if (props.pageKey === 'support' && section.sectionKey === 'faq') return <SupportFaqEditor content={content} onChange={onChange} />;
   if (props.pageKey === 'support' && section.sectionKey === 'contactCta') return <SupportContactEditor content={content} onChange={onChange} />;
   if (section.sectionKey === 'support') return <SupportEditor content={content} onChange={onChange} />;
@@ -788,6 +874,7 @@ function renderSectionEditor(section, props) {
       savedMedia={savedSection?.media}
     />;
   }
+  if (['home', 'support'].includes(props.pageKey) && section.sectionKey === 'featuredVideo') return <FeaturedVideoEditor section={section} pageKey={props.pageKey} onChange={onChange} onChangeDesign={onChangeDesign} onChangeMedia={onChangeMedia} savedSection={savedSection} />;
   if (['expression', 'lifestyle', 'newContent', 'support', 'header', 'collectionGrid'].includes(section.sectionKey)) return <CmsSectionEditor section={section} props={{ ...props, onChange, onChangeDesign, onChangeMedia, onChangeLayout }} />;
   if (section.sectionKey === 'downloadCta') return <div className="admin-editor-form"><SimpleSectionEditor content={content} onChange={onChange} /><div className="admin-field-row"><Field label="Button Text"><input value={content.buttonText || ''} onChange={(event) => onChange({ ...content, buttonText: event.target.value })} /></Field><Field label="Button Link" note="Use an internal path or a full http(s) URL."><input value={content.buttonLink || ''} onChange={(event) => onChange({ ...content, buttonLink: event.target.value })} /></Field></div></div>;
   if (section.sectionKey === 'featuredAnimations') return <FeaturedEditor content={content} design={section.design} onChangeDesign={onChangeDesign} animations={animations} onChange={onChange} />;
@@ -838,20 +925,7 @@ function PageEditor({ pageKey, animations, onViewSite, onDirtyChange }) {
     setLoading(true);
     getAdminSiteConfig(pageKey).then((data) => {
       if (cancelled) return;
-      const map = new Map(defaultSectionsFor(pageKey).map((section) => [section.sectionKey, section]));
-      for (const section of data?.page?.sections || []) {
-        map.set(section.sectionKey, {
-          sectionKey: section.sectionKey,
-          enabled: section.enabled,
-          sortOrder: section.sortOrder,
-          content: section.content,
-          design: section.design || {},
-          layout: section.layout || {},
-          media: section.media || {},
-          seo: section.seo || {},
-        });
-      }
-      const merged = Array.from(map.values());
+      const merged = mergePageSections(pageKey, data?.page?.sections);
       setSections(merged);
       setSavedSections(merged);
       setStatus('');
@@ -884,20 +958,7 @@ function PageEditor({ pageKey, animations, onViewSite, onDirtyChange }) {
         media: section.media || {},
         seo: section.seo || {},
       })));
-      const map = new Map(defaultSectionsFor(pageKey).map((section) => [section.sectionKey, section]));
-      for (const section of result?.page?.sections || []) {
-        map.set(section.sectionKey, {
-          sectionKey: section.sectionKey,
-          enabled: section.enabled,
-          sortOrder: section.sortOrder,
-          content: section.content,
-          design: section.design || {},
-          layout: section.layout || {},
-          media: section.media || {},
-          seo: section.seo || {},
-        });
-      }
-      const merged = Array.from(map.values());
+      const merged = mergePageSections(pageKey, result?.page?.sections);
       setSections(merged);
       setSavedSections(merged);
       clearPendingUploads();
