@@ -10,11 +10,17 @@
     "pages:dev": "npm run build && npx wrangler pages dev dist",
     "db:migrate:local": "npx wrangler d1 migrations apply miyo-studio --local",
     "db:migrate:remote": "npx wrangler d1 migrations apply miyo-studio --remote",
+    "vps:db:migrate": "node scripts/vps-migrate.mjs",
+    "vps:server": "node server/index.js",
+    "vps:dev": "concurrently -k \"npm run vps:server\" \"npm run dev\"",
+    "vps:check": "npm run vps:db:migrate && node --test tests/**/*.test.mjs",
     "cf:check": "node scripts/cloudflare-local-check.mjs",
     "cf:config:check": "node scripts/check-cloudflare-config.mjs",
     "admin:create": "node scripts/create-admin.mjs"
   },
   "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1",
     "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
@@ -24,6 +30,7 @@
     "@tailwindcss/postcss": "latest",
     "@vitejs/plugin-react": "latest",
     "autoprefixer": "latest",
+    "concurrently": "^10.0.5",
     "postcss": "latest",
     "tailwindcss": "latest",
     "vite": "latest"
